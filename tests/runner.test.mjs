@@ -4,7 +4,7 @@ import { createServer } from 'node:http';
 import * as fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { cleanup, deniedProbe, fixtureDir, lock, observe, prerequisite, processResult, sandbox, scratch, json } from '../lib/lab.mjs';
+import { cleanup, deniedProbe, fixtureDir, lock, observe, prerequisite, processResult, sandbox, scratch, snapshot, json } from '../lib/lab.mjs';
 import { hookModel, verifyPacked } from '../lib/packed.mjs';
 import { noUnexpectedIO, normalUnchanged, structuredFailure } from '../lib/observations.mjs';
 import { profiles, profileFor } from '../lib/profiles.mjs';
@@ -44,14 +44,21 @@ for (const custom of [false, true]) test(`hook model is green on explicit/idempo
     await assert.rejects(hookModel({ bin, name: 'argocd-axi', profile, lab: bad, invoke }), /normal command changed disposable/);
   } finally { await cleanup(root); }
 });
+test('snapshot records unreadable files without opening them', async () => {
+  const root = await scratch(), file = join(root, 'secret');
+  try {
+    await fs.writeFile(file, 'credential'); await fs.chmod(file, 0);
+    assert.equal((await snapshot(root)).secret.type, 'file');
+  } finally { await fs.chmod(file, 0o600); await cleanup(root); }
+});
 test('same-content normal-command writes are rejected', async () => {
   const root = await scratch();
   try {
     const lab = await sandbox(root); const file = join(lab.home, '.claude', 'settings.json');
     await fs.writeFile(file, '{}');
     const result = await observe(process.execPath, ['-e', `require('fs').writeFileSync(${JSON.stringify(file)}, '{}')`], lab);
-    assert.equal(result.before.home['.claude/settings.json'].content, result.after.home['.claude/settings.json'].content);
-    assert.notEqual(result.before.home['.claude/settings.json'].ctimeNs, result.after.home['.claude/settings.json'].ctimeNs);
+    assert.equal(result.before.home['.claude/settings.json'].size, result.after.home['.claude/settings.json'].size);
+    assert.notEqual(result.before.home['.claude/settings.json'].mtimeNs, result.after.home['.claude/settings.json'].mtimeNs);
     assert.throws(() => normalUnchanged(result, lab), /normal command changed/);
   } finally { await cleanup(root); }
 });

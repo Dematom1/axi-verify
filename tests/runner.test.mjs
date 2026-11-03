@@ -55,6 +55,16 @@ test('same-content normal-command writes are rejected', async () => {
     assert.throws(() => normalUnchanged(result, lab), /normal command changed/);
   } finally { await cleanup(root); }
 });
+test('unexpected absolute subprocess is recorded and rejected', async () => {
+  const root = await scratch();
+  try {
+    const lab = await sandbox(root);
+    const result = await processResult(process.execPath, ['-e', `require('child_process').spawnSync('/bin/echo', ['unexpected'])`], { env: lab.env });
+    assert.notEqual(result.exit, 0);
+    const records = (await fs.readFile(lab.env.AXI_PROCESS_LOG, 'utf8')).trim().split('\\n').map(line => JSON.parse(line));
+    assert(records.some(row => row.command === '/bin/echo' && !row.allowed));
+  } finally { await cleanup(root); }
+});
 test('network fixture permits only its explicit loopback endpoint and records rejected calls', async () => {
   const root = await scratch(), lab = await sandbox(root);
   const server = createServer((request, response) => response.end('fixture'));

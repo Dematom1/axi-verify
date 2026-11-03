@@ -64,7 +64,7 @@ Only non-root Linux and macOS are supported. Root, ineffective locks, unavailabl
 
 ## External boundaries and safety
 
-No cluster, Argo CD server, Datadog account, Google account, or Terraform backend is used. Subprocess fixtures reject unexpected calls. Datadog uses its loopback HTTP override. Search Console keeps real credential parsing and rendering, with only the Google client's request method replaced in a child-process preload. The preload rejects outbound socket connections except the fixture server's exact loopback port. Fixture credentials are synthetic. Npm registry reads are confined to package acquisition and cache warmup, with package scripts disabled during installation.
+No cluster, Argo CD server, Datadog account, Google account, or Terraform backend is used. Subprocess fixtures reject unexpected calls. Datadog uses its loopback HTTP override. Search Console keeps real credential parsing and rendering, with only the Google client's request method replaced in a child-process preload. The preload records child-process creation and rejects executables outside Node, the stored-hook shell, and sandbox fixture PATH, including absolute paths. It rejects outbound socket connections except the fixture server's exact loopback port. Fixture credentials are synthetic. Npm registry reads are confined to package acquisition and cache warmup, with package scripts disabled during installation.
 
 This is a regression verifier for trusted family packages, not an operating-system security sandbox for malicious archives. A package's local `npm pack` can run its existing lifecycle scripts. The Node boundary guard is not a general containment mechanism for arbitrary native code.
 

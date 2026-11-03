@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { cleanup, deniedProbe, fixtureDir, lock, observe, prerequisite, processResult, sandbox, scratch, json } from '../lib/lab.mjs';
 import { hookModel, verifyPacked } from '../lib/packed.mjs';
-import { normalUnchanged, structuredFailure } from '../lib/observations.mjs';
+import { noUnexpectedIO, normalUnchanged, structuredFailure } from '../lib/observations.mjs';
 import { profiles, profileFor } from '../lib/profiles.mjs';
 const cli = fileURLToPath(new URL('../bin/axi-verify.mjs', import.meta.url));
 
@@ -53,6 +53,24 @@ test('same-content normal-command writes are rejected', async () => {
     assert.equal(result.before.home['.claude/settings.json'].content, result.after.home['.claude/settings.json'].content);
     assert.notEqual(result.before.home['.claude/settings.json'].ctimeNs, result.after.home['.claude/settings.json'].ctimeNs);
     assert.throws(() => normalUnchanged(result, lab), /normal command changed/);
+  } finally { await cleanup(root); }
+});
+test('absolute shell writes to each observed root fail normal-command checks', async () => {
+  const root = await scratch();
+  try {
+    for (const target of [
+      ['home/.claude', 'settings.json'],
+      ['home/selected-claude', 'settings.json'],
+      ['cwd/.claude', 'settings.json'],
+      ['', 'unexpected.txt'],
+    ]) {
+      const lab = await sandbox(root, true);
+      const file = join(lab.base, ...target);
+      const result = await observe('/bin/sh', ['-c', 'printf side-effect > "$TARGET"'], lab, { env: { ...lab.env, TARGET: file } });
+      assert.equal(result.exit, 0, result.stderr);
+      await noUnexpectedIO(lab);
+      assert.throws(() => normalUnchanged(result, lab), /normal command changed disposable/);
+    }
   } finally { await cleanup(root); }
 });
 test('fixture shims handle expected commands and missing commands stay unavailable', async () => {

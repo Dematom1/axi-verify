@@ -59,10 +59,12 @@ test('unexpected absolute subprocess is recorded and rejected', async () => {
   const root = await scratch();
   try {
     const lab = await sandbox(root);
-    const result = await processResult(process.execPath, ['-e', `require('child_process').spawnSync('/bin/echo', ['unexpected'])`], { env: lab.env });
-    assert.notEqual(result.exit, 0);
+    const apis = ['spawn', 'spawnSync', 'exec', 'execSync', 'execFile', 'execFileSync', 'fork'];
+    const script = `const cp=require('child_process'); for (const api of ${JSON.stringify(apis)}) { try { cp[api]('/bin/echo', ['unexpected']); } catch {} }`;
+    const result = await processResult(process.execPath, ['-e', script], { env: lab.env });
+    assert.equal(result.exit, 0, result.stderr);
     const records = (await fs.readFile(lab.env.AXI_PROCESS_LOG, 'utf8')).trim().split('\\n').map(line => JSON.parse(line));
-    assert(records.some(row => row.command === '/bin/echo' && !row.allowed));
+    for (const api of apis) assert(records.some(row => row.api === api && row.command === '/bin/echo' && !row.allowed), `${api} was not rejected`);
   } finally { await cleanup(root); }
 });
 test('network fixture permits only its explicit loopback endpoint and records rejected calls', async () => {

@@ -4,21 +4,28 @@ import { appendFileSync } from 'node:fs';
 import childProcess from 'node:child_process';
 import { createRequire, syncBuiltinESMExports } from 'node:module';
 const record = (row) => appendFileSync(process.env.AXI_NETWORK_LOG, JSON.stringify(row) + '\n');
-const allowedProcess = (command, args) => {
+const allowedProcess = (api, command, args) => {
   const allowed = command === process.execPath || command === '/bin/sh' || (typeof command === 'string' && command.startsWith(process.env.PATH + '/'));
-  appendFileSync(process.env.AXI_PROCESS_LOG, JSON.stringify({ command, args, allowed }) + '\n');
+  appendFileSync(process.env.AXI_PROCESS_LOG, JSON.stringify({ api, command, args, allowed }) + '\n');
   if (!allowed) throw new Error(`AXI fixture refused unexpected subprocess: ${command}`);
 };
 const spawn = childProcess.spawn;
 childProcess.spawn = function (command, args, options) {
-  allowedProcess(command, args);
+  allowedProcess('spawn', command, args);
   return spawn.call(this, command, args, options);
 };
 const spawnSync = childProcess.spawnSync;
 childProcess.spawnSync = function (command, args, options) {
-  allowedProcess(command, args);
+  allowedProcess('spawnSync', command, args);
   return spawnSync.call(this, command, args, options);
 };
+for (const name of ['exec', 'execSync', 'execFile', 'execFileSync', 'fork']) {
+  const original = childProcess[name];
+  childProcess[name] = function (command, args, ...rest) {
+    allowedProcess(name, command, args);
+    return original.call(this, command, args, ...rest);
+  };
+}
 const connect = net.Socket.prototype.connect;
 net.Socket.prototype.connect = function (...args) {
   const options = Array.isArray(args[0]) ? args[0][0] : args[0];

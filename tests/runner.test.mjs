@@ -55,6 +55,16 @@ test('same-content normal-command writes are rejected', async () => {
     assert.throws(() => normalUnchanged(result, lab), /normal command changed/);
   } finally { await cleanup(root); }
 });
+test('sandbox fixture commands remain callable and retain the fixture log schema', async () => {
+  const root = await scratch();
+  try {
+    const lab = await sandbox(root);
+    const result = await processResult(process.execPath, ['-e', `require('child_process').spawnSync('argocd', ['app', 'list'], {stdio:'inherit'})`], { env: lab.env });
+    assert.equal(result.exit, 0, result.stderr);
+    const calls = (await fs.readFile(lab.env.AXI_FIXTURE_LOG, 'utf8')).trim().split('\\n').map(line => JSON.parse(line));
+    assert(calls.some(call => call.bin === 'argocd' && call.args.join(' ') === 'app list' && call.allowed));
+  } finally { await cleanup(root); }
+});
 test('unexpected absolute subprocess is recorded and rejected', async () => {
   const root = await scratch();
   try {

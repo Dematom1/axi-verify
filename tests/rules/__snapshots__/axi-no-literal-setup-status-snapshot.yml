@@ -1,0 +1,68 @@
+id: axi-no-literal-setup-status
+snapshots:
+  "const commands = { setup: async () => { return output({ hooks: \"removed\" }); } };":
+    labels:
+    - source: "hooks: \"removed\""
+      style: primary
+      start: 56
+      end: 72
+    - source: hooks
+      style: secondary
+      start: 56
+      end: 61
+    - source: "\"removed\""
+      style: secondary
+      start: 63
+      end: 72
+    - source: setup
+      style: secondary
+      start: 19
+      end: 24
+    - source: "setup: async () => { return output({ hooks: \"removed\" }); }"
+      style: secondary
+      start: 19
+      end: 78
+  "function setup() { return { nested: { \"installed\": true } }; }":
+    labels:
+    - source: "\"installed\": true"
+      style: primary
+      start: 38
+      end: 55
+    - source: "\"installed\""
+      style: secondary
+      start: 38
+      end: 49
+    - source: "true"
+      style: secondary
+      start: 51
+      end: 55
+    - source: setup
+      style: secondary
+      start: 9
+      end: 14
+    - source: "function setup() { return { nested: { \"installed\": true } }; }"
+      style: secondary
+      start: 0
+      end: 62
+  "function setup() { return { session_end: \"installed\" }; }":
+    labels:
+    - source: "session_end: \"installed\""
+      style: primary
+      start: 28
+      end: 52
+    - source: session_end
+      style: secondary
+      start: 28
+      end: 39
+    - source: "\"installed\""
+      style: secondary
+      start: 41
+      end: 52
+    - source: setup
+      style: secondary
+      start: 9
+      end: 14
+    - source: "function setup() { return { session_end: \"installed\" }; }"
+      style: secondary
+      start: 0
+      end: 57

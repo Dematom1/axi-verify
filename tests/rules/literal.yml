@@ -1,0 +1,11 @@
+id: axi-no-literal-setup-status
+valid:
+  - 'function setup() { return { session_end: observed ? "installed" : "absent" }; }'
+  - 'function setup() { return observedStatus; }'
+  - 'const help = "session_end: installed";'
+  - 'function statusName(s) { return s === "installed"; }'
+  - 'function unexpected() { return { installed: true }; }'
+invalid:
+  - 'function setup() { return { session_end: "installed" }; }'
+  - 'function setup() { return { nested: { "installed": true } }; }'
+  - 'const commands = { setup: async () => { return output({ hooks: "removed" }); } };'

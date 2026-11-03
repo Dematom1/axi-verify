@@ -1,0 +1,54 @@
+id: axi-no-swallowed-setup-error
+language: TypeScript
+severity: error
+message: Propagate setup failures through a typed error before returning success; collect uninstall errors too.
+constraints:
+  ERRORS:
+    regex: '^(errors|failures)$'
+  CONDITION:
+    regex: '(errors|failures)'
+rule:
+  any:
+    - all:
+        - kind: statement_block
+        - inside:
+            any:
+              - kind: function_declaration
+                has:
+                  field: name
+                  regex: '(setup|install|uninstall|hook)'
+              - kind: arrow_function
+                inside:
+                  any:
+                    - kind: pair
+                      has:
+                        field: key
+                        regex: '^["\x27]?setup["\x27]?$'
+                    - kind: variable_declarator
+                      has:
+                        field: name
+                        regex: '(setup|install|uninstall|hook)'
+        - has:
+            stopBy: end
+            pattern: $ERRORS.push($$$PUSH_ARGS)
+        - has:
+            stopBy: end
+            kind: return_statement
+        - not:
+            has:
+              stopBy: end
+              any:
+                - all:
+                    - kind: throw_statement
+                    - regex: '(errors|failures)'
+                - pattern: 'if ($CONDITION) fail($$$FAIL_ARGS)'
+                - pattern: 'if ($CONDITION) { $$$BEFORE; fail($$$FAIL_ARGS); $$$AFTER }'
+    - all:
+        - pattern: uninstallSessionStartHooks($OPTIONS)
+        - not:
+            has:
+              stopBy: end
+              kind: pair
+              has:
+                field: key
+                regex: '^onError$'

@@ -1,0 +1,36 @@
+id: axi-no-file-error-unknown
+snapshots:
+  "function formatError(error) { if (error instanceof AxiError) return typed(error); return { output: renderError(\"unexpected\", \"UNKNOWN\", []), exitCode: 1 }; }":
+    labels:
+    - source: "function formatError(error) { if (error instanceof AxiError) return typed(error); return { output: renderError(\"unexpected\", \"UNKNOWN\", []), exitCode: 1 }; }"
+      style: primary
+      start: 0
+      end: 157
+    - source: formatError
+      style: secondary
+      start: 9
+      end: 20
+    - source: renderError("unexpected", "UNKNOWN", [])
+      style: secondary
+      start: 99
+      end: 139
+  "try { readFileSync(path); } catch (e) { throw axiError(\"Cannot read\", \"UNKNOWN\"); }":
+    labels:
+    - source: catch (e) { throw axiError("Cannot read", "UNKNOWN"); }
+      style: primary
+      start: 28
+      end: 83
+    - source: readFileSync
+      style: secondary
+      start: 6
+      end: 18
+    - source: readFileSync(path)
+      style: secondary
+      start: 6
+      end: 24
+    - source: >-
+        try { readFileSync(path); } catch (e) { throw axiError("Cannot read",
+        "UNKNOWN"); }
+      style: secondary
+      start: 0
+      end: 83

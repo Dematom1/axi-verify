@@ -1,0 +1,8 @@
+id: axi-no-file-error-unknown
+valid:
+  - 'try { readFileSync(path); } catch (e) { throw axiError("Cannot read", "FILE_ERROR"); }'
+  - 'try { unexpected(); } catch (e) { throw axiError("Unexpected", "UNKNOWN"); }'
+  - 'function formatError(e) { if (e.code === "EACCES") return renderError("Fix permissions", "CONFIG_ERROR", help); return renderError("Unexpected", "UNKNOWN", []); }'
+invalid:
+  - 'try { readFileSync(path); } catch (e) { throw axiError("Cannot read", "UNKNOWN"); }'
+  - 'function formatError(error) { if (error instanceof AxiError) return typed(error); return { output: renderError("unexpected", "UNKNOWN", []), exitCode: 1 }; }'

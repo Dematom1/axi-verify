@@ -1,0 +1,27 @@
+id: axi-no-file-error-unknown
+language: TypeScript
+severity: error
+message: Classify expected filesystem failures before an unexpected-error UNKNOWN fallback.
+rule:
+  any:
+    - all:
+        - kind: catch_clause
+        - regex: '["\x27]UNKNOWN["\x27]'
+        - inside:
+            kind: try_statement
+            has:
+              stopBy: end
+              kind: call_expression
+              has:
+                field: function
+                regex: '(readFile|writeFile|unlink|mkdir|rename|stat)(Sync)?$'
+    - all:
+        - kind: function_declaration
+        - has:
+            field: name
+            regex: '^(formatError|renderErrorFallback)$'
+        - has:
+            stopBy: end
+            pattern: renderError($MESSAGE, "UNKNOWN", $HELP)
+        - not:
+            regex: '(EACCES|EPERM|isFileSystemError|filesystemError|fileError)'

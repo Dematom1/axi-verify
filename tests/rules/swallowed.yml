@@ -1,0 +1,12 @@
+id: axi-no-swallowed-setup-error
+valid:
+  - 'function install() { const next = []; next.push(hook); return next; }'
+  - 'function renderReport() { const errors = []; errors.push("non-setup diagnostic"); return { errors }; }'
+  - 'function setup() { const errors = []; install({ onError: e => errors.push(e) }); if (errors.length) fail("SETUP_FAILED", "repair permissions"); return observed; }'
+  - 'function setup() { const errors = []; install({ onError: e => errors.push(e) }); if (errors.length) throw typedError(errors); return observed; }'
+  - 'function setup() { const errors = []; try { write(); } catch (e) { errors.push(e); } if (errors.length > 0) throw typedError(errors); return observed; }'
+  - 'uninstallSessionStartHooks({ marker, onError: e => errors.push(e) });'
+invalid:
+  - 'function setup() { const errors = []; install({ onError: e => errors.push(e) }); return { errors }; }'
+  - 'function setup() { const errors = []; try { write(); } catch (e) { errors.push(e); } return { ok: true }; }'
+  - 'uninstallSessionStartHooks({ marker });'

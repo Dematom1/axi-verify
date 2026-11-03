@@ -1,0 +1,52 @@
+id: axi-no-swallowed-setup-error
+snapshots:
+  "function setup() { const errors = []; install({ onError: e => errors.push(e) }); return { errors }; }":
+    labels:
+    - source: "{ const errors = []; install({ onError: e => errors.push(e) }); return { errors }; }"
+      style: primary
+      start: 17
+      end: 101
+    - source: setup
+      style: secondary
+      start: 9
+      end: 14
+    - source: "function setup() { const errors = []; install({ onError: e => errors.push(e) }); return { errors }; }"
+      style: secondary
+      start: 0
+      end: 101
+    - source: errors.push(e)
+      style: secondary
+      start: 62
+      end: 76
+    - source: return { errors };
+      style: secondary
+      start: 81
+      end: 99
+  "function setup() { const errors = []; try { write(); } catch (e) { errors.push(e); } return { ok: true }; }":
+    labels:
+    - source: "{ const errors = []; try { write(); } catch (e) { errors.push(e); } return { ok: true }; }"
+      style: primary
+      start: 17
+      end: 107
+    - source: setup
+      style: secondary
+      start: 9
+      end: 14
+    - source: "function setup() { const errors = []; try { write(); } catch (e) { errors.push(e); } return { ok: true }; }"
+      style: secondary
+      start: 0
+      end: 107
+    - source: errors.push(e)
+      style: secondary
+      start: 67
+      end: 81
+    - source: "return { ok: true };"
+      style: secondary
+      start: 85
+      end: 105
+  "uninstallSessionStartHooks({ marker });":
+    labels:
+    - source: uninstallSessionStartHooks({ marker })
+      style: primary
+      start: 0
+      end: 38

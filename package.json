@@ -1,0 +1,24 @@
+{
+  "name": "axi-verify",
+  "version": "0.1.0",
+  "description": "Packed CLI contract and static regression checks for Dematom1 AXI tools",
+  "type": "module",
+  "license": "MIT",
+  "repository": "github:Dematom1/axi-verify",
+  "bin": { "axi-verify": "bin/axi-verify.mjs" },
+  "files": ["bin", "lib", "fixtures", "rules", "sgconfig.yml"],
+  "engines": { "node": ">=22.12" },
+  "scripts": {
+    "test": "node --test tests/*.test.mjs && ast-grep test -c sgconfig.yml",
+    "check": "npm test",
+    "proof:history": "node scripts/prove-history.mjs",
+    "proof:published": "node scripts/prove-published.mjs",
+    "proof:runtime": "node scripts/prove-regressions.mjs"
+  },
+  "dependencies": {
+    "@ast-grep/cli": "0.51.1",
+    "@toon-format/toon": "2.3.1",
+    "smol-toml": "1.9.1",
+    "yaml": "2.9.1"
+  }
+}

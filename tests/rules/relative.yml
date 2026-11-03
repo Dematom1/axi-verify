@@ -1,0 +1,16 @@
+id: axi-no-relative-hook-command
+valid:
+  - 'const command = quote(resolve(entry)); const hook = { command };'
+  - 'const hook = { command: `${quote(absolute)} context end` };'
+  - 'const legacy = "argo-workflows-axi context end"; hooks.filter(h => h.command !== legacy);'
+  - 'const old = "./tool"; removeOldHook(old);'
+  - 'function help() { return encodeObject({ command: `k8s-axi ${command}` }); }'
+  - 'function setup() { return { hooks: { command: "datadog-axi-ctx (local config only)" } }; }'
+invalid:
+  - 'const hook = { command: "./tool context" };'
+  - 'const hook = { "command": "../tool context" };'
+  - 'const legacy = "argocd-axi context end"; const hook = { "command": legacy };'
+  - 'const hook = { command: "../bin/tool context" };'
+  - 'const hook = { command: "argocd-axi context end" };'
+  - 'const markerCommand = `argo-workflows-axi context end # ${MARKER}`; hooks.push({ type: "command", command: markerCommand });'
+  - 'const command = "argocd-axi context end"; hooks.push({ type: "command", command });'

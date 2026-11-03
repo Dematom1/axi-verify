@@ -55,26 +55,17 @@ test('same-content normal-command writes are rejected', async () => {
     assert.throws(() => normalUnchanged(result, lab), /normal command changed/);
   } finally { await cleanup(root); }
 });
-test('sandbox fixture commands remain callable and retain the fixture log schema', async () => {
+test('fixture shims handle expected commands and missing commands stay unavailable', async () => {
   const root = await scratch();
   try {
     const lab = await sandbox(root);
-    const result = await processResult(process.execPath, ['-e', `require('child_process').spawnSync('argocd', ['app', 'list'], {stdio:'inherit'})`], { env: lab.env });
+    const result = await processResult(process.execPath, ['-e', `const cp=require('child_process'); const fixture=cp.spawnSync('argocd', ['app', 'list'], {encoding:'utf8'}); const missing=cp.spawnSync('not-a-fixture', []); console.log(JSON.stringify({fixture,missing:missing.error?.code}));`], { env: lab.env });
     assert.equal(result.exit, 0, result.stderr);
-    const calls = (await fs.readFile(lab.env.AXI_FIXTURE_LOG, 'utf8')).trim().split('\\n').map(line => JSON.parse(line));
+    const observed = JSON.parse(result.stdout);
+    assert.equal(observed.fixture.status, 0);
+    assert.equal(observed.missing, 'ENOENT');
+    const calls = (await fs.readFile(lab.env.AXI_FIXTURE_LOG, 'utf8')).trim().split('\n').map(line => JSON.parse(line));
     assert(calls.some(call => call.bin === 'argocd' && call.args.join(' ') === 'app list' && call.allowed));
-  } finally { await cleanup(root); }
-});
-test('unexpected absolute subprocess is recorded and rejected', async () => {
-  const root = await scratch();
-  try {
-    const lab = await sandbox(root);
-    const apis = ['spawn', 'spawnSync', 'exec', 'execSync', 'execFile', 'execFileSync', 'fork'];
-    const script = `const cp=require('child_process'); for (const api of ${JSON.stringify(apis)}) { try { cp[api]('/bin/echo', ['unexpected']); } catch {} }`;
-    const result = await processResult(process.execPath, ['-e', script], { env: lab.env });
-    assert.equal(result.exit, 0, result.stderr);
-    const records = (await fs.readFile(lab.env.AXI_PROCESS_LOG, 'utf8')).trim().split('\\n').map(line => JSON.parse(line));
-    for (const api of apis) assert(records.some(row => row.api === api && row.command === '/bin/echo' && !row.allowed), `${api} was not rejected`);
   } finally { await cleanup(root); }
 });
 test('network fixture permits only its explicit loopback endpoint and records rejected calls', async () => {

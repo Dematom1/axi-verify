@@ -58,7 +58,7 @@ Checks cover:
 - Repair after relocation to a path with spaces and a quote, including a generated legacy hook. A real offline `npm exec --package <archive>` invocation follows an isolated dependency-cache warmup.
 - Nonempty default lists containing healthy and problem fixtures, exact default fields, and explicit expansion where supported. Lists with two fields remain valid.
 
-The hook-model check is strict. Normal commands must not change files anywhere in the disposable HOME or scratch root (excluding observation-owned fixture and network logs). File contents and nanosecond change timestamps detect same-content rewrites and temporary create/remove pairs without filesystem-call mocks. Two `setup hooks` runs must leave exactly one managed entry per integration. Removal must remove **all entries installed by setup**, while another tool's hooks and settings survive. This supersedes the original plan's SessionEnd-only exemption for Argo CD and Datadog. Those published implementations can fail until their complete-removal fixes ship.
+The hook-model check is strict. Normal commands must not change files anywhere in the disposable HOME or scratch root (excluding observation-owned fixture and network logs). Path, type, size, mode, and modification-time snapshots detect filesystem changes without filesystem-call mocks. Two `setup hooks` runs must leave exactly one managed entry per integration. Removal must remove **all entries installed by setup**, while another tool's hooks and settings survive. This supersedes the original plan's SessionEnd-only exemption for Argo CD and Datadog. Those published implementations can fail until their complete-removal fixes ship.
 
 Only non-root Linux and macOS are supported. Root, ineffective locks, unavailable fixtures, unexpected external calls, malformed output, and timeouts fail rather than skip.
 
@@ -74,7 +74,7 @@ Cleanup restores scratch modes and removes only the runner's scratch tree. Evide
 
 By default, evidence is written beneath `.axi-evidence/<timestamp>` in the caller's directory. `--evidence-dir` selects another location. Preserve it as a CI artifact even on failure.
 
-`identity.json` records the archive SHA-512, package version, source claim, archive `gitHead`, both manifests, runtime versions, platform, architecture, and uid. Numbered row files contain argv, the sanitized environment, process output and exit, decoded output, before/after file contents and timestamps, probes, observations, and fixture request records. `summary.json` lists every verdict. A fatal prerequisite produces `fatal.json`, never a passing summary.
+`identity.json` records the archive SHA-512, package version, source claim, archive `gitHead`, both manifests, runtime versions, platform, architecture, and uid. Numbered row files contain argv, the sanitized environment, process output and exit, decoded output, before/after filesystem metadata snapshots, probes, observations, and fixture request records. `summary.json` lists every verdict. A fatal prerequisite produces `fatal.json`, never a passing summary.
 
 The published-proof script additionally saves registry metadata, archive bytes, and their verified registry integrity. It records the provenance-attestation URL but does not claim independent signature verification.
 

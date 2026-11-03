@@ -32,12 +32,12 @@ try {
     await fs.copyFile(archive, join(evidence, name, packed[0].filename));
     try {
       const result = await verifyPacked({ tarball: archive, expectedGitHead: registry.gitHead, evidenceDir: join(evidence, name) });
-      results.push({ name, version, artifact: 'published', passed: result.passed, rows: result.rows.length, failures: result.rows.filter(row => !row.passed).map(row => ({ id: row.id, error: row.error })) });
+      results.push({ name, version, artifact: 'published', passed: result.passed, rows: result.rows.length, failures: result.failures, knownLimitations: result.knownLimitations });
     } catch (error) { results.push({ name, version, artifact: 'published', passed: false, prerequisiteError: error.message }); }
   }
   if (process.argv[3]) {
     const result = await verifyPacked({ tarball: resolve(process.argv[3]), evidenceDir: join(evidence, 'k8s-axi') });
-    results.push({ name: result.package, version: result.version, artifact: 'UNPUBLISHED local pack; registry proof pending', passed: result.passed, rows: result.rows.length, failures: result.rows.filter(row => !row.passed).map(row => ({ id: row.id, error: row.error })) });
+    results.push({ name: result.package, version: result.version, artifact: 'UNPUBLISHED local pack; registry proof pending', passed: result.passed, rows: result.rows.length, failures: result.failures, knownLimitations: result.knownLimitations });
   } else results.push({ name: 'k8s-axi', artifact: 'unpublished; local archive not supplied', passed: false, prerequisiteError: 'Published-artifact proof pending; npm registry E404 at initial baseline' });
   await json(join(evidence, 'catalog-summary.json'), results);
   process.stdout.write(encode({ tools: results.map(({ name, version, artifact, passed, rows }) => ({ name, version: version ?? 'unpublished', artifact, passed, rows: rows ?? 0 })), evidence }) + '\n');

@@ -2,26 +2,59 @@ id: axi-no-file-error-unknown
 language: TypeScript
 severity: error
 message: Classify expected filesystem failures before an unexpected-error UNKNOWN fallback.
-rule:
-  any:
-    - all:
-        - kind: catch_clause
-        - regex: '["\x27]UNKNOWN["\x27]'
-        - inside:
-            kind: try_statement
-            has:
+utils:
+  file-classifier:
+    any:
+      - all:
+          - kind: binary_expression
+          - has:
+              field: left
+              pattern: $ERROR.code
+          - has:
+              field: operator
+              regex: '^==={0,1}$'
+          - has:
+              field: right
+              regex: '^["\x27](EACCES|EPERM|EROFS)["\x27]$'
+      - pattern: isFileSystemError($ERROR)
+      - all:
+          - any:
+              - pattern: '[$$$CODES].includes($ERROR.code)'
+              - pattern: '[$$$CODES].includes(String($ERROR.code))'
+          - has:
               stopBy: end
-              kind: call_expression
-              has:
-                field: function
-                regex: '(readFile|writeFile|unlink|mkdir|rename|stat)(Sync)?$'
-    - all:
-        - kind: function_declaration
-        - has:
-            field: name
-            regex: '^(formatError|renderErrorFallback)$'
-        - has:
+              regex: '^["\x27](EACCES|EPERM|EROFS)["\x27]$'
+  classified-branch:
+    all:
+      - kind: if_statement
+      - has:
+          field: condition
+          has:
             stopBy: end
-            pattern: renderError($MESSAGE, "UNKNOWN", $HELP)
-        - not:
-            regex: '(EACCES|EPERM|isFileSystemError|filesystemError|fileError)'
+            matches: file-classifier
+rule:
+  all:
+    - any:
+        - all:
+            - kind: catch_clause
+            - regex: '["\x27]UNKNOWN["\x27]'
+            - inside:
+                kind: try_statement
+                has:
+                  stopBy: end
+                  kind: call_expression
+                  has:
+                    field: function
+                    regex: '(readFile|writeFile|unlink|mkdir|rename|stat)(Sync)?$'
+        - all:
+            - kind: function_declaration
+            - has:
+                field: name
+                regex: '^(formatError|renderErrorFallback)$'
+            - has:
+                stopBy: end
+                pattern: renderError($MESSAGE, "UNKNOWN", $HELP)
+    - not:
+        has:
+          stopBy: end
+          matches: classified-branch

@@ -1,5 +1,157 @@
 id: axi-no-swallowed-setup-error
 snapshots:
+  "function setup() { const errors = []; install({ onError: e => errors.push(e) }); if (DEBUG) throw typedError(errors); return observed; }":
+    labels:
+    - source: "{ const errors = []; install({ onError: e => errors.push(e) }); if (DEBUG) throw typedError(errors); return observed; }"
+      style: primary
+      start: 17
+      end: 136
+    - source: setup
+      style: secondary
+      start: 9
+      end: 14
+    - source: "function setup() { const errors = []; install({ onError: e => errors.push(e) }); if (DEBUG) throw typedError(errors); return observed; }"
+      style: secondary
+      start: 0
+      end: 136
+    - source: errors
+      style: secondary
+      start: 25
+      end: 31
+    - source: "[]"
+      style: secondary
+      start: 34
+      end: 36
+    - source: errors = []
+      style: secondary
+      start: 25
+      end: 36
+    - source: const errors = [];
+      style: secondary
+      start: 19
+      end: 37
+    - source: errors.push(e)
+      style: secondary
+      start: 62
+      end: 76
+    - source: return observed;
+      style: secondary
+      start: 118
+      end: 134
+  "function setup() { const errors = []; install({ onError: e => errors.push(e) }); if (DEBUG) { if (errors.length) throw typedError(errors); } return observed; }":
+    labels:
+    - source: "{ const errors = []; install({ onError: e => errors.push(e) }); if (DEBUG) { if (errors.length) throw typedError(errors); } return observed; }"
+      style: primary
+      start: 17
+      end: 159
+    - source: setup
+      style: secondary
+      start: 9
+      end: 14
+    - source: "function setup() { const errors = []; install({ onError: e => errors.push(e) }); if (DEBUG) { if (errors.length) throw typedError(errors); } return observed; }"
+      style: secondary
+      start: 0
+      end: 159
+    - source: errors
+      style: secondary
+      start: 25
+      end: 31
+    - source: "[]"
+      style: secondary
+      start: 34
+      end: 36
+    - source: errors = []
+      style: secondary
+      start: 25
+      end: 36
+    - source: const errors = [];
+      style: secondary
+      start: 19
+      end: 37
+    - source: errors.push(e)
+      style: secondary
+      start: 62
+      end: 76
+    - source: return observed;
+      style: secondary
+      start: 141
+      end: 157
+  "function setup() { const errors = []; install({ onError: e => errors.push(e) }); if (failures.length) throw typedError(failures); return observed; }":
+    labels:
+    - source: "{ const errors = []; install({ onError: e => errors.push(e) }); if (failures.length) throw typedError(failures); return observed; }"
+      style: primary
+      start: 17
+      end: 148
+    - source: setup
+      style: secondary
+      start: 9
+      end: 14
+    - source: "function setup() { const errors = []; install({ onError: e => errors.push(e) }); if (failures.length) throw typedError(failures); return observed; }"
+      style: secondary
+      start: 0
+      end: 148
+    - source: errors
+      style: secondary
+      start: 25
+      end: 31
+    - source: "[]"
+      style: secondary
+      start: 34
+      end: 36
+    - source: errors = []
+      style: secondary
+      start: 25
+      end: 36
+    - source: const errors = [];
+      style: secondary
+      start: 19
+      end: 37
+    - source: errors.push(e)
+      style: secondary
+      start: 62
+      end: 76
+    - source: return observed;
+      style: secondary
+      start: 130
+      end: 146
+  "function setup() { const errors = []; install({ onError: e => errors.push(e) }); return observed; if (errors.length) throw typedError(errors); }":
+    labels:
+    - source: "{ const errors = []; install({ onError: e => errors.push(e) }); return observed; if (errors.length) throw typedError(errors); }"
+      style: primary
+      start: 17
+      end: 144
+    - source: setup
+      style: secondary
+      start: 9
+      end: 14
+    - source: "function setup() { const errors = []; install({ onError: e => errors.push(e) }); return observed; if (errors.length) throw typedError(errors); }"
+      style: secondary
+      start: 0
+      end: 144
+    - source: errors
+      style: secondary
+      start: 25
+      end: 31
+    - source: "[]"
+      style: secondary
+      start: 34
+      end: 36
+    - source: errors = []
+      style: secondary
+      start: 25
+      end: 36
+    - source: const errors = [];
+      style: secondary
+      start: 19
+      end: 37
+    - source: errors.push(e)
+      style: secondary
+      start: 62
+      end: 76
+    - source: return observed;
+      style: secondary
+      start: 81
+      end: 97
   "function setup() { const errors = []; install({ onError: e => errors.push(e) }); return { errors }; }":
     labels:
     - source: "{ const errors = []; install({ onError: e => errors.push(e) }); return { errors }; }"
@@ -14,6 +166,22 @@ snapshots:
       style: secondary
       start: 0
       end: 101
+    - source: errors
+      style: secondary
+      start: 25
+      end: 31
+    - source: "[]"
+      style: secondary
+      start: 34
+      end: 36
+    - source: errors = []
+      style: secondary
+      start: 25
+      end: 36
+    - source: const errors = [];
+      style: secondary
+      start: 19
+      end: 37
     - source: errors.push(e)
       style: secondary
       start: 62
@@ -36,6 +204,22 @@ snapshots:
       style: secondary
       start: 0
       end: 107
+    - source: errors
+      style: secondary
+      start: 25
+      end: 31
+    - source: "[]"
+      style: secondary
+      start: 34
+      end: 36
+    - source: errors = []
+      style: secondary
+      start: 25
+      end: 36
+    - source: const errors = [];
+      style: secondary
+      start: 19
+      end: 37
     - source: errors.push(e)
       style: secondary
       start: 67
@@ -50,3 +234,15 @@ snapshots:
       style: primary
       start: 0
       end: 38
+  "uninstallSessionStartHooks({ marker, onError: e => console.error(e) });":
+    labels:
+    - source: "uninstallSessionStartHooks({ marker, onError: e => console.error(e) })"
+      style: primary
+      start: 0
+      end: 70
+  "uninstallSessionStartHooks({ marker, onError: e => {} });":
+    labels:
+    - source: "uninstallSessionStartHooks({ marker, onError: e => {} })"
+      style: primary
+      start: 0
+      end: 56

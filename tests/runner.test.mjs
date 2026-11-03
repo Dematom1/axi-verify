@@ -84,13 +84,13 @@ test('fixture shims handle expected commands and missing commands stay unavailab
   const root = await scratch();
   try {
     const lab = await sandbox(root);
-    const result = await processResult(process.execPath, ['-e', `const cp=require('child_process'); const fixture=cp.spawnSync('argocd', ['app', 'list'], {encoding:'utf8'}); const missing=cp.spawnSync('not-a-fixture', []); console.log(JSON.stringify({fixture,missing:missing.error?.code}));`], { env: lab.env });
+    const result = await processResult(process.execPath, ['-e', `const cp=require('child_process'); const fixture=cp.spawnSync('argocd', ['app', 'list', '-o', 'json'], {encoding:'utf8'}); const missing=cp.spawnSync('not-a-fixture', []); console.log(JSON.stringify({fixture,missing:missing.error?.code}));`], { env: lab.env });
     assert.equal(result.exit, 0, result.stderr);
     const observed = JSON.parse(result.stdout);
     assert.equal(observed.fixture.status, 0);
     assert.equal(observed.missing, 'ENOENT');
     const calls = (await fs.readFile(lab.env.AXI_FIXTURE_LOG, 'utf8')).trim().split('\n').map(line => JSON.parse(line));
-    assert(calls.some(call => call.bin === 'argocd' && call.args.join(' ') === 'app list' && call.allowed));
+    assert(calls.some(call => call.bin === 'argocd' && call.args.join(' ') === 'app list -o json' && call.allowed));
   } finally { await cleanup(root); }
 });
 test('network fixture permits only its explicit loopback endpoint and records rejected calls', async () => {

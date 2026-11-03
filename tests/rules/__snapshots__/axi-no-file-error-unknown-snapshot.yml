@@ -14,6 +14,22 @@ snapshots:
       style: secondary
       start: 99
       end: 139
+  "function formatError(error) { return renderError(\"unexpected\", \"UNKNOWN\", [\"check EACCES or EPERM\"]); }":
+    labels:
+    - source: >-
+        function formatError(error) { return renderError("unexpected", "UNKNOWN",
+        ["check EACCES or EPERM"]); }
+      style: primary
+      start: 0
+      end: 103
+    - source: formatError
+      style: secondary
+      start: 9
+      end: 20
+    - source: renderError("unexpected", "UNKNOWN", ["check EACCES or EPERM"])
+      style: secondary
+      start: 37
+      end: 100
   "try { readFileSync(path); } catch (e) { throw axiError(\"Cannot read\", \"UNKNOWN\"); }":
     labels:
     - source: catch (e) { throw axiError("Cannot read", "UNKNOWN"); }

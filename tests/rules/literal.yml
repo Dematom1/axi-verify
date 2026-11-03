@@ -6,6 +6,7 @@ valid:
   - 'function statusName(s) { return s === "installed"; }'
   - 'function unexpected() { return { installed: true }; }'
 invalid:
+  - 'const setupHooks = () => ({ installed: true });'
   - 'function setup() { return { session_end: "installed" }; }'
   - 'function setup() { return { nested: { "installed": true } }; }'
   - 'const commands = { setup: async () => { return output({ hooks: "removed" }); } };'

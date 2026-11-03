@@ -75,7 +75,8 @@ try {
       const before = await recordedCommand(join(evidence, 'terraform-before'), id);
       const after = await recordedCommand(join(evidence, 'terraform-current'), id);
       assert.equal(before.exit, 0); assert.equal(after.exit, 1);
-      const originalHooks = Object.entries(before.after.home).filter(([path, value]) => /hooks.json|settings.json|plugins/.test(path) && value.content?.includes('terraform-axi'));
+      assert(before.managedState, 'permission command must retain independently observed managed state even when exit validation fails');
+      const originalHooks = Object.values(before.managedState.counts).filter(count => count > 0);
       if (id.includes('uninstall')) assert(originalHooks.length > 0, 'historical removal must leave managed files');
       else assert.equal(originalHooks.length, 0, 'all-denied install must leave no managed files');
       proofs.push({ id: 'terraform-' + id, source: 'e069c3a269cd1850ae2d155bb3993410946955e2', bad: 'historical unpublished local pack', fixed: 'terraform-axi@0.1.0', red: 'failed mutation exited zero', green: true, scope: 'exit and file preservation only; complete current row remains red for missing parsed code' });

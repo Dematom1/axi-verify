@@ -1,5 +1,8 @@
 // Observe/reject external I/O only; CLI handlers, renderers and filesystem calls remain real.
 import net from 'node:net';
+import dgram from 'node:dgram';
+import dns from 'node:dns';
+import dnsPromises from 'node:dns/promises';
 import { appendFileSync } from 'node:fs';
 import { createRequire, syncBuiltinESMExports } from 'node:module';
 const record = (row) => appendFileSync(process.env.AXI_NETWORK_LOG, JSON.stringify(row) + '\n');
@@ -13,6 +16,16 @@ net.Socket.prototype.connect = function (...args) {
   if (!allowed) throw new Error('AXI fixture refused external network connection');
   return connect.apply(this, args);
 };
+const refuse = kind => function () {
+  record({ kind, allowed: false });
+  throw new Error('AXI fixture refused external network connection');
+};
+dgram.Socket.prototype.send = refuse('udp');
+for (const api of [dns, dnsPromises, dns.Resolver.prototype, dnsPromises.Resolver.prototype]) {
+  for (const key of Object.getOwnPropertyNames(api)) {
+    if (key === 'lookup' || key === 'lookupService' || key === 'reverse' || key.startsWith('resolve')) api[key] = refuse(`dns:${key}`);
+  }
+}
 syncBuiltinESMExports();
 if (process.env.AXI_GOOGLE_ROOT) {
   const require = createRequire(process.env.AXI_GOOGLE_ROOT + '/package.json');

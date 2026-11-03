@@ -130,6 +130,58 @@ snapshots:
       style: secondary
       start: 13
       end: 50
+  "const hook = { command: \"node ./script.js\" };":
+    labels:
+    - source: "command: \"node ./script.js\""
+      style: primary
+      start: 15
+      end: 42
+    - source: command
+      style: secondary
+      start: 15
+      end: 22
+    - source: "\"node ./script.js\""
+      style: secondary
+      start: 24
+      end: 42
+    - source: hook
+      style: secondary
+      start: 6
+      end: 10
+    - source: "hook = { command: \"node ./script.js\" }"
+      style: secondary
+      start: 6
+      end: 44
+    - source: "{ command: \"node ./script.js\" }"
+      style: secondary
+      start: 13
+      end: 44
+  "const hook = { command: `node \"../relative script.js\"` };":
+    labels:
+    - source: "command: `node \"../relative script.js\"`"
+      style: primary
+      start: 15
+      end: 54
+    - source: command
+      style: secondary
+      start: 15
+      end: 22
+    - source: "`node \"../relative script.js\"`"
+      style: secondary
+      start: 24
+      end: 54
+    - source: hook
+      style: secondary
+      start: 6
+      end: 10
+    - source: "hook = { command: `node \"../relative script.js\"` }"
+      style: secondary
+      start: 6
+      end: 56
+    - source: "{ command: `node \"../relative script.js\"` }"
+      style: secondary
+      start: 13
+      end: 56
   "const legacy = \"argocd-axi context end\"; const hook = { \"command\": legacy };":
     labels:
     - source: legacy = "argocd-axi context end"

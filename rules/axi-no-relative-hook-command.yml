@@ -37,7 +37,7 @@ rule:
             regex: '^["\x27]?command["\x27]?$'
         - has:
             field: value
-            regex: '^["\x27`](\.{1,2}/|[a-z0-9-]+-axi(?:-ctx)?[ \x27"`])'
+            regex: '^["\x27`](\.{1,2}/|node\s+["\x27]?\.{1,2}/|[a-z0-9-]+-axi(?:-ctx)?[ \x27"`])'
         - inside:
             matches: hook-object
     - all:
@@ -47,7 +47,7 @@ rule:
             selector: variable_declarator
         - has:
             field: value
-            regex: '^["\x27`](\.{1,2}/|[a-z0-9-]+-axi(?:-ctx)?[ \x27"`])'
+            regex: '^["\x27`](\.{1,2}/|node\s+["\x27]?\.{1,2}/|[a-z0-9-]+-axi(?:-ctx)?[ \x27"`])'
         - inside:
             stopBy: end
             kind: program

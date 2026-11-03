@@ -5,13 +5,35 @@ message: Propagate setup failures through a typed error before returning success
 constraints:
   ERRORS:
     regex: '^(errors|failures)$'
-  CONDITION:
-    regex: '(errors|failures)'
+utils:
+  propagation:
+    any:
+      - kind: throw_statement
+      - kind: expression_statement
+        has:
+          pattern: fail($$$ARGS)
+  error-guard:
+    all:
+      - kind: if_statement
+      - has:
+          field: condition
+          any:
+            - pattern: ($ERRORS.length)
+            - pattern: ($ERRORS.length > 0)
+      - has:
+          field: consequence
+          any:
+            - matches: propagation
+            - all:
+                - kind: statement_block
+                - has:
+                    matches: propagation
 rule:
   any:
     - all:
         - kind: statement_block
         - inside:
+            stopBy: end
             any:
               - kind: function_declaration
                 has:
@@ -29,26 +51,43 @@ rule:
                         field: name
                         regex: '(setup|install|uninstall|hook)'
         - has:
+            kind: lexical_declaration
+            has:
+              kind: variable_declarator
+              all:
+                - has:
+                    field: name
+                    pattern: $ERRORS
+                - has:
+                    field: value
+                    regex: '^\[\]$'
+        - has:
             stopBy: end
             pattern: $ERRORS.push($$$PUSH_ARGS)
         - has:
-            stopBy: end
             kind: return_statement
         - not:
             has:
-              stopBy: end
-              any:
-                - all:
-                    - kind: throw_statement
-                    - regex: '(errors|failures)'
-                - pattern: 'if ($CONDITION) fail($$$FAIL_ARGS)'
-                - pattern: 'if ($CONDITION) { $$$BEFORE; fail($$$FAIL_ARGS); $$$AFTER }'
+              kind: return_statement
+              follows:
+                stopBy: end
+                matches: error-guard
     - all:
         - pattern: uninstallSessionStartHooks($OPTIONS)
         - not:
             has:
               stopBy: end
-              kind: pair
-              has:
-                field: key
-                regex: '^onError$'
+              all:
+                - kind: pair
+                - has:
+                    field: key
+                    regex: '^onError$'
+                - has:
+                    field: value
+                    all:
+                      - kind: arrow_function
+                      - has:
+                          stopBy: end
+                          any:
+                            - pattern: $ERRORS.push($$$RECORD_ARGS)
+                            - kind: throw_statement

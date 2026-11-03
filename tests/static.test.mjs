@@ -8,7 +8,7 @@ test('static scans caller production commands, not tests, generated output or un
   const root = await scratch();
   try {
     const invalid = 'function setup() { return { session_end: "installed" }; }';
-    for (const path of ['src/commands/setup.ts', 'tests/setup.ts', 'fixtures/setup.ts', 'dist/setup.ts', 'skills/setup.ts', 'node_modules/other/setup.ts', 'src/unrelated.ts']) {
+    for (const path of ['src/commands/setup.ts', 'tests/setup.ts', 'fixtures/setup.ts', 'dist/setup.ts', 'build/commands/setup.ts', 'skills/setup.ts', 'node_modules/other/setup.ts', 'src/unrelated.ts']) {
       const file = join(root, path); await fs.mkdir(join(file, '..'), { recursive: true }); await fs.writeFile(file, invalid);
     }
     const result = await verifyStatic(root);

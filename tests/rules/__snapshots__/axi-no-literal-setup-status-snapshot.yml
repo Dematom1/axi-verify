@@ -22,6 +22,28 @@ snapshots:
       style: secondary
       start: 19
       end: 78
+  "const setupHooks = () => ({ installed: true });":
+    labels:
+    - source: "installed: true"
+      style: primary
+      start: 28
+      end: 43
+    - source: installed
+      style: secondary
+      start: 28
+      end: 37
+    - source: "true"
+      style: secondary
+      start: 39
+      end: 43
+    - source: setupHooks
+      style: secondary
+      start: 6
+      end: 16
+    - source: "setupHooks = () => ({ installed: true })"
+      style: secondary
+      start: 6
+      end: 46
   "function setup() { return { nested: { \"installed\": true } }; }":
     labels:
     - source: "\"installed\": true"

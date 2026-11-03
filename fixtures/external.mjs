@@ -8,7 +8,7 @@ if (bin === 'argocd') {
   if (text.startsWith('context')) value = 'CURRENT  NAME   SERVER\n*        probe  probe.invalid\n';
   else if (text.startsWith('account get-user-info')) value = { loggedIn: true, username: 'fixture', groups: [] };
   else if (text.startsWith('version')) value = { client: { version: 'v3.0.0' }, server: { version: 'v3.0.0' } };
-  else if (text.startsWith('app list')) value = ['healthy', 'problem'].map((name, index) => ({
+  else if (JSON.stringify(args) === JSON.stringify(['app', 'list', '-o', 'json'])) value = ['healthy', 'problem'].map((name, index) => ({
     metadata: { name, namespace: 'default' }, spec: { project: 'probe', source: { repoURL: 'https://example.invalid/repo' } },
     status: { sync: { status: index ? 'OutOfSync' : 'Synced' }, health: { status: index ? 'Degraded' : 'Healthy', message: index ? 'synthetic readiness failure' : '' }, resources: [] },
   }));

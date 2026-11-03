@@ -26,7 +26,7 @@ if (args.length === 1 && ['--version', '-v', '-V'].includes(args[0])) {
       }
       if (options.expectedGitHead && !options.tarball) throw new TypeError('--expected-git-head requires --tarball (never repack a release artifact)');
       const result = command === 'packed' ? await (await import('../lib/packed.mjs')).verifyPacked(options) : await (await import('../lib/static.mjs')).verifyStatic();
-      output(command === 'packed' ? { package: result.package, version: result.version, passed: result.passed, rows: result.rows.length, failures: result.rows.filter(row => !row.passed), evidence: result.evidence } : result);
+      output(command === 'packed' ? { package: result.package, version: result.version, passed: result.passed, rows: result.rows.length, failures: result.failures, known_limitations: result.knownLimitations, evidence: result.evidence } : result);
       if (!result.passed) process.exitCode = 1;
     }
   } catch (error) {

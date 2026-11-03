@@ -89,10 +89,9 @@ try {
     if (mutation === 'version') {
       const originalVersion = manifest.version;
       manifest.version = '0.1.999999'; await json(file, manifest);
-      const leaf = join(packageDir, 'dist', 'src', 'version.js');
-      const source = await fs.readFile(leaf, 'utf8');
-      assert(source.includes('export const VERSION = readPackageVersion();'));
-      await fs.writeFile(leaf, source.replace('export const VERSION = readPackageVersion();', `export const VERSION = ${JSON.stringify(originalVersion)};`));
+      const entry = join(packageDir, typeof manifest.bin === 'string' ? manifest.bin : manifest.bin[manifest.name]);
+      const source = await fs.readFile(entry, 'utf8'), end = source.indexOf('\n') + 1;
+      await fs.writeFile(entry, source.slice(0, end) + `if (process.argv.includes('--version')) { console.log(${JSON.stringify(originalVersion)}); process.exit(0); }\n` + source.slice(end));
     }
     else {
       const entry = join(packageDir, manifest.bin[manifest.name]);

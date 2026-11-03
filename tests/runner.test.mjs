@@ -41,7 +41,7 @@ for (const custom of [false, true]) test(`hook model is green on explicit/idempo
     const observed = await hookModel({ bin, name: 'argocd-axi', profile, lab: good, invoke });
     assert.equal(observed.removed.counts['claude:SessionStart'], 0);
     const bad = await sandbox(root, custom); bad.env.AXI_BAD_NORMAL = '1';
-    await assert.rejects(hookModel({ bin, name: 'argocd-axi', profile, lab: bad, invoke }), /normal command changed agent\/config files/);
+    await assert.rejects(hookModel({ bin, name: 'argocd-axi', profile, lab: bad, invoke }), /normal command changed disposable/);
   } finally { await cleanup(root); }
 });
 test('same-content normal-command writes are rejected', async () => {

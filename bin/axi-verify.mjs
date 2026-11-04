@@ -12,7 +12,7 @@ if (args.length === 1 && ["--version", "-v", "-V"].includes(args[0])) {
   const { encode } = await import("@toon-format/toon");
   const output = (value) => process.stdout.write(encode(value) + "\n");
   const help =
-    "axi-verify packed [--tarball <absolute.tgz>] [--expected-git-head <40-char-sha>] [--evidence-dir <path>] [--family idempotency] | static";
+    "axi-verify packed [--tarball <absolute.tgz>] [--expected-git-head <40-char-sha>] [--evidence-dir <path>] | static";
   try {
     if (
       args.length === 0 ||
@@ -36,7 +36,6 @@ if (args.length === 1 && ["--version", "-v", "-V"].includes(args[0])) {
         "--tarball": "tarball",
         "--expected-git-head": "expectedGitHead",
         "--evidence-dir": "evidenceDir",
-        "--family": "family",
       };
       while (rest.length) {
         const flag = rest.shift();
@@ -51,8 +50,6 @@ if (args.length === 1 && ["--version", "-v", "-V"].includes(args[0])) {
           throw new TypeError(`Supply ${flag} exactly once with a value`);
         options[flags[flag]] = value;
       }
-      if (options.family && options.family !== "idempotency")
-        throw new TypeError("--family must be idempotency (omit for all checks)");
       if (options.expectedGitHead && !options.tarball)
         throw new TypeError(
           "--expected-git-head requires --tarball (never repack a release artifact)",

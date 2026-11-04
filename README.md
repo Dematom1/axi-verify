@@ -44,13 +44,6 @@ The normal-command checks exercise each profile's listed commands before and aft
 
 ## Idempotency checks
 
-`packed` includes the `idempotency` family by default. To run only that family:
-
-```sh
-axi-verify packed --tarball /absolute/tool.tgz \
-	--family idempotency --evidence-dir /absolute/evidence
-```
-
 `lib/retry-profiles.mjs` declares each command's class, arguments, input, and fixture state. The inventory check captures the tool's SDK command registration without dispatching data commands. It checks advertised nested help and command-refusal registries against the declared fixtures. New registered or advertised commands without fixtures fail. Discovered non-refused help routes also get repeat-read checks. This is bounded command coverage, not proof of every argument combination or an unadvertised branch inside a dispatcher.
 
 Each fixture has its own HOME, XDG paths, working directory, native state, and call log. Auxiliary context bins have explicit read fixtures too. The new writable-grant fixture uses a real terminal through Python 3.9 or later's standard-library `pty` module. Python runs in isolated mode, and no confirmation bypass is added. Both invocations share that fixture. Checks include:

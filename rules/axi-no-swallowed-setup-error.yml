@@ -1,0 +1,93 @@
+id: axi-no-swallowed-setup-error
+language: TypeScript
+severity: error
+message: Propagate setup failures through a typed error before returning success; collect uninstall errors too.
+constraints:
+  ERRORS:
+    regex: '^(errors|failures)$'
+utils:
+  propagation:
+    any:
+      - kind: throw_statement
+      - kind: expression_statement
+        has:
+          pattern: fail($$$ARGS)
+  error-guard:
+    all:
+      - kind: if_statement
+      - has:
+          field: condition
+          any:
+            - pattern: ($ERRORS.length)
+            - pattern: ($ERRORS.length > 0)
+      - has:
+          field: consequence
+          any:
+            - matches: propagation
+            - all:
+                - kind: statement_block
+                - has:
+                    matches: propagation
+rule:
+  any:
+    - all:
+        - kind: statement_block
+        - inside:
+            stopBy: end
+            any:
+              - kind: function_declaration
+                has:
+                  field: name
+                  regex: '(setup|install|uninstall|hook)'
+              - kind: arrow_function
+                inside:
+                  any:
+                    - kind: pair
+                      has:
+                        field: key
+                        regex: '^["\x27]?setup["\x27]?$'
+                    - kind: variable_declarator
+                      has:
+                        field: name
+                        regex: '(setup|install|uninstall|hook)'
+        - has:
+            kind: lexical_declaration
+            has:
+              kind: variable_declarator
+              all:
+                - has:
+                    field: name
+                    pattern: $ERRORS
+                - has:
+                    field: value
+                    regex: '^\[\]$'
+        - has:
+            stopBy: end
+            pattern: $ERRORS.push($$$PUSH_ARGS)
+        - has:
+            kind: return_statement
+        - not:
+            has:
+              kind: return_statement
+              follows:
+                stopBy: end
+                matches: error-guard
+    - all:
+        - pattern: uninstallSessionStartHooks($OPTIONS)
+        - not:
+            has:
+              stopBy: end
+              all:
+                - kind: pair
+                - has:
+                    field: key
+                    regex: '^onError$'
+                - has:
+                    field: value
+                    all:
+                      - kind: arrow_function
+                      - has:
+                          stopBy: end
+                          any:
+                            - pattern: $ERRORS.push($$$RECORD_ARGS)
+                            - kind: throw_statement

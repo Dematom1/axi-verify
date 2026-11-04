@@ -1,0 +1,294 @@
+id: axi-no-relative-hook-command
+snapshots:
+  "const command = \"argocd-axi context end\"; hooks.push({ type: \"command\", command });":
+    labels:
+    - source: command = "argocd-axi context end"
+      style: primary
+      start: 6
+      end: 40
+    - source: "\"argocd-axi context end\""
+      style: secondary
+      start: 16
+      end: 40
+    - source: "type: \"command\""
+      style: secondary
+      start: 55
+      end: 70
+    - source: "{ type: \"command\", command }"
+      style: secondary
+      start: 53
+      end: 81
+    - source: command
+      style: secondary
+      start: 72
+      end: 79
+    - source: "const command = \"argocd-axi context end\"; hooks.push({ type: \"command\", command });"
+      style: secondary
+      start: 0
+      end: 83
+    - source: const command = "argocd-axi context end";
+      style: secondary
+      start: 0
+      end: 41
+  "const hook = { \"command\": \"../tool context\" };":
+    labels:
+    - source: "\"command\": \"../tool context\""
+      style: primary
+      start: 15
+      end: 43
+    - source: "\"command\""
+      style: secondary
+      start: 15
+      end: 24
+    - source: "\"../tool context\""
+      style: secondary
+      start: 26
+      end: 43
+    - source: hook
+      style: secondary
+      start: 6
+      end: 10
+    - source: "hook = { \"command\": \"../tool context\" }"
+      style: secondary
+      start: 6
+      end: 45
+    - source: "{ \"command\": \"../tool context\" }"
+      style: secondary
+      start: 13
+      end: 45
+  "const hook = { command: \"../bin/tool context\" };":
+    labels:
+    - source: "command: \"../bin/tool context\""
+      style: primary
+      start: 15
+      end: 45
+    - source: command
+      style: secondary
+      start: 15
+      end: 22
+    - source: "\"../bin/tool context\""
+      style: secondary
+      start: 24
+      end: 45
+    - source: hook
+      style: secondary
+      start: 6
+      end: 10
+    - source: "hook = { command: \"../bin/tool context\" }"
+      style: secondary
+      start: 6
+      end: 47
+    - source: "{ command: \"../bin/tool context\" }"
+      style: secondary
+      start: 13
+      end: 47
+  "const hook = { command: \"./tool context\" };":
+    labels:
+    - source: "command: \"./tool context\""
+      style: primary
+      start: 15
+      end: 40
+    - source: command
+      style: secondary
+      start: 15
+      end: 22
+    - source: "\"./tool context\""
+      style: secondary
+      start: 24
+      end: 40
+    - source: hook
+      style: secondary
+      start: 6
+      end: 10
+    - source: "hook = { command: \"./tool context\" }"
+      style: secondary
+      start: 6
+      end: 42
+    - source: "{ command: \"./tool context\" }"
+      style: secondary
+      start: 13
+      end: 42
+  "const hook = { command: \"argocd-axi context end\" };":
+    labels:
+    - source: "command: \"argocd-axi context end\""
+      style: primary
+      start: 15
+      end: 48
+    - source: command
+      style: secondary
+      start: 15
+      end: 22
+    - source: "\"argocd-axi context end\""
+      style: secondary
+      start: 24
+      end: 48
+    - source: hook
+      style: secondary
+      start: 6
+      end: 10
+    - source: "hook = { command: \"argocd-axi context end\" }"
+      style: secondary
+      start: 6
+      end: 50
+    - source: "{ command: \"argocd-axi context end\" }"
+      style: secondary
+      start: 13
+      end: 50
+  "const hook = { command: \"node --enable-source-maps ./bin/hook.js\" };":
+    labels:
+    - source: "command: \"node --enable-source-maps ./bin/hook.js\""
+      style: primary
+      start: 15
+      end: 65
+    - source: command
+      style: secondary
+      start: 15
+      end: 22
+    - source: "\"node --enable-source-maps ./bin/hook.js\""
+      style: secondary
+      start: 24
+      end: 65
+    - source: hook
+      style: secondary
+      start: 6
+      end: 10
+    - source: "hook = { command: \"node --enable-source-maps ./bin/hook.js\" }"
+      style: secondary
+      start: 6
+      end: 67
+    - source: "{ command: \"node --enable-source-maps ./bin/hook.js\" }"
+      style: secondary
+      start: 13
+      end: 67
+  "const hook = { command: \"node ./script.js\" };":
+    labels:
+    - source: "command: \"node ./script.js\""
+      style: primary
+      start: 15
+      end: 42
+    - source: command
+      style: secondary
+      start: 15
+      end: 22
+    - source: "\"node ./script.js\""
+      style: secondary
+      start: 24
+      end: 42
+    - source: hook
+      style: secondary
+      start: 6
+      end: 10
+    - source: "hook = { command: \"node ./script.js\" }"
+      style: secondary
+      start: 6
+      end: 44
+    - source: "{ command: \"node ./script.js\" }"
+      style: secondary
+      start: 13
+      end: 44
+  "const hook = { command: `node \"../relative script.js\"` };":
+    labels:
+    - source: "command: `node \"../relative script.js\"`"
+      style: primary
+      start: 15
+      end: 54
+    - source: command
+      style: secondary
+      start: 15
+      end: 22
+    - source: "`node \"../relative script.js\"`"
+      style: secondary
+      start: 24
+      end: 54
+    - source: hook
+      style: secondary
+      start: 6
+      end: 10
+    - source: "hook = { command: `node \"../relative script.js\"` }"
+      style: secondary
+      start: 6
+      end: 56
+    - source: "{ command: `node \"../relative script.js\"` }"
+      style: secondary
+      start: 13
+      end: 56
+  "const legacy = \"argocd-axi context end\"; const hook = { \"command\": legacy };":
+    labels:
+    - source: legacy = "argocd-axi context end"
+      style: primary
+      start: 6
+      end: 39
+    - source: "\"argocd-axi context end\""
+      style: secondary
+      start: 15
+      end: 39
+    - source: "\"command\""
+      style: secondary
+      start: 56
+      end: 65
+    - source: legacy
+      style: secondary
+      start: 67
+      end: 73
+    - source: hook
+      style: secondary
+      start: 47
+      end: 51
+    - source: "hook = { \"command\": legacy }"
+      style: secondary
+      start: 47
+      end: 75
+    - source: "{ \"command\": legacy }"
+      style: secondary
+      start: 54
+      end: 75
+    - source: "\"command\": legacy"
+      style: secondary
+      start: 56
+      end: 73
+    - source: "const legacy = \"argocd-axi context end\"; const hook = { \"command\": legacy };"
+      style: secondary
+      start: 0
+      end: 76
+    - source: const legacy = "argocd-axi context end";
+      style: secondary
+      start: 0
+      end: 40
+  "const markerCommand = `argo-workflows-axi context end # ${MARKER}`; hooks.push({ type: \"command\", command: markerCommand });":
+    labels:
+    - source: "markerCommand = `argo-workflows-axi context end # ${MARKER}`"
+      style: primary
+      start: 6
+      end: 66
+    - source: "`argo-workflows-axi context end # ${MARKER}`"
+      style: secondary
+      start: 22
+      end: 66
+    - source: command
+      style: secondary
+      start: 98
+      end: 105
+    - source: markerCommand
+      style: secondary
+      start: 107
+      end: 120
+    - source: "type: \"command\""
+      style: secondary
+      start: 81
+      end: 96
+    - source: "{ type: \"command\", command: markerCommand }"
+      style: secondary
+      start: 79
+      end: 122
+    - source: "command: markerCommand"
+      style: secondary
+      start: 98
+      end: 120
+    - source: "const markerCommand = `argo-workflows-axi context end # ${MARKER}`; hooks.push({ type: \"command\", command: markerCommand });"
+      style: secondary
+      start: 0
+      end: 124
+    - source: "const markerCommand = `argo-workflows-axi context end # ${MARKER}`;"
+      style: secondary
+      start: 0
+      end: 67

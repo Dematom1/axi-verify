@@ -1,0 +1,56 @@
+name: Verify axi-verify
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  test:
+    name: Package tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm test
+      - name: Preserve historical red/green evidence
+        run: npm run proof:history -- "$RUNNER_TEMP/static-history"
+      - name: Historical runtime red/green assertions
+        run: npm run proof:runtime -- "$RUNNER_TEMP/runtime-history"
+      - name: Real root must fail before installing an artifact
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          set +e
+          sudo -n "$(command -v node)" bin/axi-verify.mjs packed > "$RUNNER_TEMP/root-precondition.txt"
+          code=$?
+          set -e
+          test "$code" -eq 1
+          grep 'root cannot prove permission denials' "$RUNNER_TEMP/root-precondition.txt"
+      - name: Install and invoke the package's own archive
+        shell: bash
+        run: |
+          archive="$(npm pack --ignore-scripts --silent --pack-destination "$RUNNER_TEMP")"
+          npm install --prefix "$RUNNER_TEMP/self-install" --ignore-scripts --no-audit --no-fund "$RUNNER_TEMP/$archive"
+          test "$("$RUNNER_TEMP/self-install/node_modules/.bin/axi-verify" --version)" = "$(node -p 'require("./package.json").version')"
+          "$RUNNER_TEMP/self-install/node_modules/.bin/axi-verify" static
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: proof-${{ matrix.os }}
+          path: |
+            ${{ runner.temp }}/static-history
+            ${{ runner.temp }}/runtime-history
+            ${{ runner.temp }}/root-precondition.txt
+          retention-days: 14

@@ -1,0 +1,123 @@
+id: axi-no-relative-hook-command
+language: TypeScript
+severity: error
+message: Store a resolved, quoted executable in hooks; bare or relative paths depend on agent cwd/PATH.
+utils:
+  hook-object:
+    all:
+      - kind: object
+      - any:
+          - has:
+              pattern:
+                context: '({ type: "command" })'
+                selector: pair
+          - has:
+              kind: pair
+              has:
+                field: key
+                regex: '^["\x27]?marker["\x27]?$'
+          - inside:
+              kind: variable_declarator
+              has:
+                field: name
+                regex: '(hook|Hook)'
+          - inside:
+              kind: arguments
+              inside:
+                kind: call_expression
+                has:
+                  field: function
+                  regex: '(hook|Hook)'
+  parameter-shadow:
+    all:
+      - any:
+          - kind: function_declaration
+          - kind: function_expression
+          - kind: arrow_function
+          - kind: method_definition
+      - any:
+          - has:
+              field: parameters
+              has:
+                any:
+                  - kind: required_parameter
+                  - kind: optional_parameter
+                has:
+                  field: pattern
+                  pattern: $COMMAND
+          - has:
+              field: parameter
+              pattern: $COMMAND
+  hook-reference:
+    all:
+      - any:
+          - all:
+              - kind: pair
+              - has:
+                  field: key
+                  regex: '^["\x27]?command["\x27]?$'
+              - has:
+                  field: value
+                  pattern: $COMMAND
+          - pattern:
+              context: '({ $COMMAND })'
+              selector: shorthand_property_identifier
+      - inside:
+          matches: hook-object
+rule:
+  any:
+    - all:
+        - kind: pair
+        - has:
+            field: key
+            regex: '^["\x27]?command["\x27]?$'
+        - has:
+            field: value
+            regex: '^["\x27`](\.{1,2}/|node\s+(?:--?[^\s"\x27`]+\s+)*["\x27]?\.{1,2}/|[a-z0-9-]+-axi(?:-ctx)?[ \x27"`])'
+        - inside:
+            matches: hook-object
+    - all:
+        - kind: variable_declarator
+        - pattern:
+            context: 'const $COMMAND = $VALUE;'
+            selector: variable_declarator
+        - has:
+            field: value
+            regex: '^["\x27`](\.{1,2}/|node\s+(?:--?[^\s"\x27`]+\s+)*["\x27]?\.{1,2}/|[a-z0-9-]+-axi(?:-ctx)?[ \x27"`])'
+        - inside:
+            kind: lexical_declaration
+            inside:
+              any:
+                - all:
+                    - any:
+                        - kind: program
+                        - kind: statement_block
+                    - has:
+                        stopBy:
+                          any:
+                            - kind: statement_block
+                            - kind: function_declaration
+                            - kind: arrow_function
+                            - kind: method_definition
+                        matches: hook-reference
+                - all:
+                    - kind: program
+                    - has:
+                        stopBy: end
+                        all:
+                          - matches: hook-reference
+                          - not:
+                              inside:
+                                stopBy: end
+                                matches: parameter-shadow
+                          - not:
+                              inside:
+                                stopBy: end
+                                kind: statement_block
+                                has:
+                                  kind: lexical_declaration
+                                  has:
+                                    kind: variable_declarator
+                                    has:
+                                      field: name
+                                      pattern: $COMMAND

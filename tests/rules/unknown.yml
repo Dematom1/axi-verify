@@ -1,0 +1,16 @@
+id: axi-no-file-error-unknown
+valid:
+  - 'try { readFileSync(path); } catch (e) { throw axiError("Cannot read", "FILE_ERROR"); }'
+  - 'try { unexpected(); } catch (e) { throw axiError("Unexpected", "UNKNOWN"); }'
+  - 'function formatError(e) { if (e.code === "EACCES") return renderError("Fix permissions", "CONFIG_ERROR", help); return renderError("Unexpected", "UNKNOWN", []); }'
+  - 'try { readFileSync(path); } catch (e) { if (e.code === "EACCES") throw axiError("Fix permissions", "FILE_ERROR"); throw axiError("Unexpected", "UNKNOWN"); }'
+invalid:
+  - 'try { readFileSync(path); } catch { throw axiError("Unexpected", "UNKNOWN"); }'
+  - 'try { readFileSync(path); } catch (e) { function nested(e) { if (e.code === "EACCES") throw axiError("Nested", "FILE_ERROR"); } throw axiError("Unexpected", "UNKNOWN"); }'
+  - 'function formatError(e, other) { if (other.code === "EACCES") return renderError("Other error", "FILE_ERROR", help); return renderError("Unexpected", "UNKNOWN", []); }'
+  - 'try { readFileSync(path); } catch (e) { if (other.code === "EACCES") throw axiError("Other error", "FILE_ERROR"); throw axiError("Unexpected", "UNKNOWN"); }'
+  - 'function formatError(e) { if (other.code === "EACCES") return renderError("Other error", "FILE_ERROR", help); return renderError("Unexpected", "UNKNOWN", []); }'
+  - 'try { readFileSync(path); } catch (e) { if (e.code === "EACCES") console.error(e); throw axiError("Unexpected", "UNKNOWN"); }'
+  - 'function formatError(error) { return renderError("unexpected", "UNKNOWN", ["check EACCES or EPERM"]); }'
+  - 'try { readFileSync(path); } catch (e) { throw axiError("Cannot read", "UNKNOWN"); }'
+  - 'function formatError(error) { if (error instanceof AxiError) return typed(error); return { output: renderError("unexpected", "UNKNOWN", []), exitCode: 1 }; }'

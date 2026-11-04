@@ -1,0 +1,103 @@
+id: axi-no-file-error-unknown
+language: TypeScript
+severity: error
+message: Classify expected filesystem failures before an unexpected-error UNKNOWN fallback.
+utils:
+  filesystem-catch:
+    all:
+      - kind: catch_clause
+      - regex: '["\x27]UNKNOWN["\x27]'
+      - inside:
+          kind: try_statement
+          has:
+            stopBy: end
+            kind: call_expression
+            has:
+              field: function
+              regex: '(readFile|writeFile|unlink|mkdir|rename|stat)(Sync)?$'
+  file-classifier:
+    any:
+      - all:
+          - kind: binary_expression
+          - has:
+              field: left
+              pattern: $ERROR.code
+          - has:
+              field: operator
+              regex: '^==={0,1}$'
+          - has:
+              field: right
+              regex: '^["\x27](EACCES|EPERM|EROFS)["\x27]$'
+      - pattern: isFileSystemError($ERROR)
+      - all:
+          - any:
+              - pattern: '[$$$CODES].includes($ERROR.code)'
+              - pattern: '[$$$CODES].includes(String($ERROR.code))'
+          - has:
+              stopBy: end
+              regex: '^["\x27](EACCES|EPERM|EROFS)["\x27]$'
+  typed-exit:
+    all:
+      - any:
+          - kind: throw_statement
+          - kind: return_statement
+      - regex: '["\x27](FILE_ERROR|CONFIG_ERROR|CONFIG_INVALID|SETUP_FAILED)["\x27]'
+      - not:
+          regex: '["\x27]UNKNOWN["\x27]'
+  classified-branch:
+    all:
+      - kind: if_statement
+      - has:
+          field: condition
+          has:
+            stopBy: end
+            matches: file-classifier
+      - has:
+          field: consequence
+          any:
+            - matches: typed-exit
+            - all:
+                - kind: statement_block
+                - has:
+                    matches: typed-exit
+rule:
+  any:
+    - all:
+        - matches: filesystem-catch
+        - not:
+            has:
+              field: parameter
+              regex: '.'
+    - all:
+        - any:
+            - all:
+                - matches: filesystem-catch
+                - has:
+                    field: parameter
+                    pattern: $ERROR
+            - all:
+                - kind: function_declaration
+                - has:
+                    field: name
+                    regex: '^(formatError|renderErrorFallback)$'
+                - has:
+                    field: parameters
+                    has:
+                      kind: required_parameter
+                      nthChild: 1
+                      has:
+                        field: pattern
+                        pattern: $ERROR
+                - has:
+                    stopBy: end
+                    pattern: renderError($MESSAGE, "UNKNOWN", $HELP)
+        - not:
+            has:
+              stopBy:
+                any:
+                  - kind: catch_clause
+                  - kind: function_declaration
+                  - kind: function_expression
+                  - kind: arrow_function
+                  - kind: method_definition
+              matches: classified-branch

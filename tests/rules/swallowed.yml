@@ -1,0 +1,20 @@
+id: axi-no-swallowed-setup-error
+valid:
+  - 'function install() { const next = []; next.push(hook); return next; }'
+  - 'function renderReport() { const errors = []; errors.push("non-setup diagnostic"); return { errors }; }'
+  - 'function setup() { const errors = []; install({ onError: e => errors.push(e) }); if (errors.length) fail("SETUP_FAILED", "repair permissions"); return observed; }'
+  - 'function setup() { const errors = []; install({ onError: e => errors.push(e) }); if (errors.length) throw typedError(errors); return observed; }'
+  - 'function setup() { const errors = []; try { write(); } catch (e) { errors.push(e); } if (errors.length > 0) throw typedError(errors); return observed; }'
+  - 'uninstallSessionStartHooks({ marker, onError: e => errors.push(e) });'
+  - 'uninstallSessionStartHooks({ marker, onError: e => { throw e; } });'
+  - 'function setup() { if (hooks) { const errors = []; install({ onError: e => errors.push(e) }); if (errors.length) throw typedError(errors); return observed; } }'
+invalid:
+  - 'function setup() { const errors = []; install({ onError: e => errors.push(e) }); return observed; if (errors.length) throw typedError(errors); }'
+  - 'function setup() { const errors = []; install({ onError: e => errors.push(e) }); if (failures.length) throw typedError(failures); return observed; }'
+  - 'function setup() { const errors = []; install({ onError: e => errors.push(e) }); if (DEBUG) throw typedError(errors); return observed; }'
+  - 'function setup() { const errors = []; install({ onError: e => errors.push(e) }); if (DEBUG) { if (errors.length) throw typedError(errors); } return observed; }'
+  - 'uninstallSessionStartHooks({ marker, onError: e => {} });'
+  - 'uninstallSessionStartHooks({ marker, onError: e => console.error(e) });'
+  - 'function setup() { const errors = []; install({ onError: e => errors.push(e) }); return { errors }; }'
+  - 'function setup() { const errors = []; try { write(); } catch (e) { errors.push(e); } return { ok: true }; }'
+  - 'uninstallSessionStartHooks({ marker });'

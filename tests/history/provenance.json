@@ -1,0 +1,39 @@
+[
+  {
+    "file": "argo-setup.ts",
+    "repository": "Dematom1/argo-workflows-axi",
+    "revision": "28217eba3686b18acd222b52d8f148c76796d61d",
+    "path": "src/commands/setup.ts",
+    "sha256": "fa820f959324bd181acaddbb089849a56407dbc2b1f9c628c3d4fa400caea973",
+    "expected": {
+      "axi-no-file-error-unknown": 1,
+      "axi-no-literal-setup-status": 1,
+      "axi-no-relative-hook-command": 1,
+      "axi-no-swallowed-setup-error": 2
+    }
+  },
+  {
+    "file": "terraform-cli.ts",
+    "repository": "Dematom1/terraform-axi",
+    "revision": "e069c3a269cd1850ae2d155bb3993410946955e2",
+    "path": "src/cli.ts",
+    "sha256": "552e7bd0aa2f1c88828d98a2a7ae516468f63099a38a73ecb0c46a761e89ecee",
+    "expected": { "axi-no-literal-setup-status": 1, "axi-no-swallowed-setup-error": 2 }
+  },
+  {
+    "file": "argocd-cli.ts",
+    "repository": "Dematom1/argocd-axi",
+    "revision": "23ed411594a4bbd4df00b381add760034ca72367",
+    "path": "src/cli.ts",
+    "sha256": "13012b5b4c31dea1f87fa6dc38d53599e7d2a6c9fc017019e59f37fb571133d5",
+    "expected": { "axi-no-file-error-unknown": 1 }
+  },
+  {
+    "file": "argocd-session-hook.ts",
+    "repository": "Dematom1/argocd-axi",
+    "revision": "23ed411594a4bbd4df00b381add760034ca72367",
+    "path": "src/session-hook.ts",
+    "sha256": "38d9cb60cff075b15accedbba7f92e289cf4aa5fc1b2eb3a0ca58385cd4392e5",
+    "expected": { "axi-no-relative-hook-command": 1 }
+  }
+]

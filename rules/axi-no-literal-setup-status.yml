@@ -1,0 +1,32 @@
+id: axi-no-literal-setup-status
+language: TypeScript
+severity: error
+message: Derive persisted setup status from file observations, not a literal success.
+rule:
+  all:
+    - kind: pair
+    - has:
+        field: key
+        regex: '^["\x27]?(session_end|sessionEnd|claude_session_end|installed|hooks)["\x27]?$'
+    - has:
+        field: value
+        regex: '^(true|["\x27](installed|removed)["\x27])$'
+    - inside:
+        stopBy: end
+        any:
+          - kind: function_declaration
+            has:
+              field: name
+              regex: '(setup|install|uninstall|hook)'
+          - kind: method_definition
+            has:
+              field: name
+              regex: '(setup|install|uninstall|hook)'
+          - kind: variable_declarator
+            has:
+              field: name
+              regex: '(setup|install|uninstall|hook)'
+          - kind: pair
+            has:
+              field: key
+              regex: '^setup$'

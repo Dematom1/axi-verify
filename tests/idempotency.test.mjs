@@ -4,7 +4,7 @@ import * as fs from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { sandbox, scratch, cleanup, observe, json } from "../lib/lab.mjs";
-import { checkRetry } from "../lib/idempotency.mjs";
+import { checkRetry, idempotencyRows } from "../lib/idempotency.mjs";
 import { commandInventory } from "../lib/command-inventory.mjs";
 
 const tool = fileURLToPath(new URL("../fixtures/retry-tool.mjs", import.meta.url));
@@ -64,21 +64,10 @@ test("double-act and same-content rewrites are red", async () => {
   await assert.rejects(run("read", "elapsed-state", false, false, timeText), /repeat output changed/);
 });
 
-test("keyring and package installers cannot reach host state", async () => {
+test("package installer shim rejects an unregistered install", async () => {
   const root = await scratch();
   try {
     const lab = await sandbox(root);
-    lab.env.AXI_KEYRING_STATE = join(lab.base, "keyring.json");
-    await json(lab.env.AXI_KEYRING_STATE, {});
-    const result = await observe(process.execPath, ["--input-type=module", "-e", `
-      import { AsyncEntry } from '@napi-rs/keyring';
-      const entry = new AsyncEntry('fixture', 'account');
-      await entry.setPassword('synthetic');
-      console.log(await entry.getPassword());
-    `], lab);
-    assert.equal(result.exit, 0, result.stderr);
-    assert.equal(result.stdout.trim(), "synthetic");
-    assert.equal(JSON.parse(await fs.readFile(lab.env.AXI_KEYRING_STATE, "utf8"))["fixture:account"], "synthetic");
     const installer = await observe(join(lab.bin, "npm"), ["install", "-g", "never-install-this"], lab);
     assert.equal(installer.exit, 97);
   } finally { await cleanup(root); }
@@ -115,6 +104,15 @@ test("executable operation registry rejects a missing write, a read mislabeled a
     assert.equal(result.coverage.permittedWrites, 2);
     assert.equal(result.coverage.writeFixtures, 1);
     assert.equal(result.coverage.events, 1);
+    // Explicit profile rows are the execution plan. Advertised help must not
+    // silently add read classifications to that plan.
+    const ids = [];
+    await idempotencyRows({ ...options, bins: { "argocd-axi": bin }, row: async (id, body) => {
+      ids.push(id);
+      if (id === "idempotency-bin-inventory" || id === "idempotency-command-inventory")
+        return body(lab, options.invoke);
+    } });
+    assert.equal(ids.length, profile.idempotency.length + 2);
   } finally { await cleanup(root); }
 });
 

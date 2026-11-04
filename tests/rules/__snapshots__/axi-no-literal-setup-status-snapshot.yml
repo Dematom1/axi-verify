@@ -1,5 +1,27 @@
 id: axi-no-literal-setup-status
 snapshots:
+  "class Tool { setup() { return { installed: true }; } }":
+    labels:
+    - source: "installed: true"
+      style: primary
+      start: 32
+      end: 47
+    - source: installed
+      style: secondary
+      start: 32
+      end: 41
+    - source: "true"
+      style: secondary
+      start: 43
+      end: 47
+    - source: setup
+      style: secondary
+      start: 13
+      end: 18
+    - source: "setup() { return { installed: true }; }"
+      style: secondary
+      start: 13
+      end: 52
   "const commands = { setup: async () => { return output({ hooks: \"removed\" }); } };":
     labels:
     - source: "hooks: \"removed\""
@@ -44,6 +66,28 @@ snapshots:
       style: secondary
       start: 6
       end: 46
+  "const tool = { setup() { return { installed: true }; } };":
+    labels:
+    - source: "installed: true"
+      style: primary
+      start: 34
+      end: 49
+    - source: installed
+      style: secondary
+      start: 34
+      end: 43
+    - source: "true"
+      style: secondary
+      start: 45
+      end: 49
+    - source: setup
+      style: secondary
+      start: 15
+      end: 20
+    - source: "setup() { return { installed: true }; }"
+      style: secondary
+      start: 15
+      end: 54
   "function setup() { return { nested: { \"installed\": true } }; }":
     labels:
     - source: "\"installed\": true"

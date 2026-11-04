@@ -18,6 +18,10 @@ rule:
             has:
               field: name
               regex: '(setup|install|uninstall|hook)'
+          - kind: method_definition
+            has:
+              field: name
+              regex: '(setup|install|uninstall|hook)'
           - kind: variable_declarator
             has:
               field: name

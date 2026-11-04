@@ -28,6 +28,22 @@ utils:
                 has:
                   field: function
                   regex: '(hook|Hook)'
+  hook-reference:
+    all:
+      - any:
+          - all:
+              - kind: pair
+              - has:
+                  field: key
+                  regex: '^["\x27]?command["\x27]?$'
+              - has:
+                  field: value
+                  pattern: $COMMAND
+          - pattern:
+              context: '({ $COMMAND })'
+              selector: shorthand_property_identifier
+      - inside:
+          matches: hook-object
 rule:
   any:
     - all:
@@ -37,7 +53,7 @@ rule:
             regex: '^["\x27]?command["\x27]?$'
         - has:
             field: value
-            regex: '^["\x27`](\.{1,2}/|node\s+["\x27]?\.{1,2}/|[a-z0-9-]+-axi(?:-ctx)?[ \x27"`])'
+            regex: '^["\x27`](\.{1,2}/|node\s+(?:--?[^\s"\x27`]+\s+)*["\x27]?\.{1,2}/|[a-z0-9-]+-axi(?:-ctx)?[ \x27"`])'
         - inside:
             matches: hook-object
     - all:
@@ -47,24 +63,37 @@ rule:
             selector: variable_declarator
         - has:
             field: value
-            regex: '^["\x27`](\.{1,2}/|node\s+["\x27]?\.{1,2}/|[a-z0-9-]+-axi(?:-ctx)?[ \x27"`])'
+            regex: '^["\x27`](\.{1,2}/|node\s+(?:--?[^\s"\x27`]+\s+)*["\x27]?\.{1,2}/|[a-z0-9-]+-axi(?:-ctx)?[ \x27"`])'
         - inside:
-            stopBy: end
-            kind: program
-            has:
-              stopBy: end
-              all:
-                - any:
-                    - all:
-                        - kind: pair
-                        - has:
-                            field: key
-                            regex: '^["\x27]?command["\x27]?$'
-                        - has:
-                            field: value
-                            pattern: $COMMAND
-                    - pattern:
-                        context: '({ $COMMAND })'
-                        selector: shorthand_property_identifier
-                - inside:
-                    matches: hook-object
+            kind: lexical_declaration
+            inside:
+              any:
+                - all:
+                    - any:
+                        - kind: program
+                        - kind: statement_block
+                    - has:
+                        stopBy:
+                          any:
+                            - kind: statement_block
+                            - kind: function_declaration
+                            - kind: arrow_function
+                            - kind: method_definition
+                        matches: hook-reference
+                - all:
+                    - kind: program
+                    - has:
+                        stopBy: end
+                        all:
+                          - matches: hook-reference
+                          - not:
+                              inside:
+                                stopBy: end
+                                kind: statement_block
+                                has:
+                                  kind: lexical_declaration
+                                  has:
+                                    kind: variable_declarator
+                                    has:
+                                      field: name
+                                      pattern: $COMMAND

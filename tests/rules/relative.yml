@@ -7,7 +7,9 @@ valid:
   - 'function help() { return encodeObject({ command: `k8s-axi ${command}` }); }'
   - 'function setup() { return { hooks: { command: "datadog-axi-ctx (local config only)" } }; }'
   - 'const hook = { command: "node /absolute/script.js" };'
+  - 'const command = "argocd-axi context end"; function setup() { const command = absolute; const hook = { command }; }'
 invalid:
+  - 'const hook = { command: "node --enable-source-maps ./bin/hook.js" };'
   - 'const hook = { command: "node ./script.js" };'
   - 'const hook = { command: `node "../relative script.js"` };'
   - 'const hook = { command: "./tool context" };'

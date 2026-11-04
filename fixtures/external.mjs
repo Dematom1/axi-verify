@@ -4,6 +4,7 @@ import { basename } from "node:path";
 const bin = basename(process.argv[1]);
 const args = process.argv.slice(2),
   text = args.join(" ");
+const exact = (expected) => JSON.stringify(args) === JSON.stringify(expected);
 let value;
 if (bin === "argocd") {
   if (text.startsWith("context"))
@@ -13,7 +14,7 @@ if (bin === "argocd") {
   else if (text.startsWith("version"))
     value = { client: { version: "v3.0.0" }, server: { version: "v3.0.0" } };
   else if (
-    JSON.stringify(args) === JSON.stringify(["app", "list", "-o", "json"])
+    exact(["app", "list", "-o", "json"])
   )
     value = ["healthy", "problem"].map((name, index) => ({
       metadata: { name, namespace: "default" },
@@ -32,7 +33,7 @@ if (bin === "argocd") {
     }));
 } else if (bin === "argo") {
   if (text.startsWith("version")) value = "argo: v3.6.0\n";
-  else if (text.startsWith("list"))
+  else if (exact(["list", "--output=json", "--loglevel=error"]))
     value = ["healthy", "problem"].map((name, index) => ({
       metadata: {
         name,
@@ -69,7 +70,7 @@ if (bin === "argocd") {
     value = { clientVersion: { gitVersion: "v1.34.0" } };
   else if (/\bget namespace default\b/.test(text))
     value = "namespace/default\n";
-  else if (/\bget pods\b/.test(text))
+  else if (exact(["get", "pods", "-n", "default", "-o", "json", "--context=probe", "--request-timeout=15000ms"]))
     value = {
       apiVersion: "v1",
       kind: "PodList",
@@ -99,10 +100,10 @@ if (bin === "argocd") {
       })),
     };
 } else if (["terraform", "tofu"].includes(bin)) {
-  if (text.includes("version -json")) value = { terraform_version: "1.10.0" };
-  else if (text.includes("state list"))
+  if (exact(["version", "-json"])) value = { terraform_version: "1.10.0" };
+  else if (exact([`-chdir=${process.cwd()}`, "state", "list"]))
     value = "terraform_data.healthy\nterraform_data.problem\n";
-  else if (text.includes("show -json"))
+  else if (exact([`-chdir=${process.cwd()}`, "show", "-json"]))
     value = {
       format_version: "1.0",
       values: {

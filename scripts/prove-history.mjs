@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import * as fs from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
-import { join, resolve } from "node:path";
+import { join, resolve, sep } from "node:path";
 import { astGrep, config } from "../lib/static.mjs";
 import { cleanup, json, processResult, scratch } from "../lib/lab.mjs";
 
@@ -19,9 +19,10 @@ function replace(source, old, next) {
   return source.replace(old, next);
 }
 export async function proveHistory(evidenceDir) {
-  const evidence = resolve(evidenceDir),
-    root = await scratch(),
-    proof = [];
+  const evidence = resolve(evidenceDir);
+  const repository = resolve(fileURLToPath(new URL("../", import.meta.url)));
+  if (evidence === repository || evidence.startsWith(repository + sep)) throw new TypeError("Evidence must be outside the repository");
+  const root = await scratch(), proof = [];
   try {
     for (const item of provenance) {
       const original = await fs.readFile(join(history, item.file), "utf8");

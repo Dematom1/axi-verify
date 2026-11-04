@@ -26,6 +26,10 @@ snapshots:
       style: secondary
       start: 0
       end: 83
+    - source: const command = "argocd-axi context end";
+      style: secondary
+      start: 0
+      end: 41
   "const hook = { \"command\": \"../tool context\" };":
     labels:
     - source: "\"command\": \"../tool context\""
@@ -130,6 +134,32 @@ snapshots:
       style: secondary
       start: 13
       end: 50
+  "const hook = { command: \"node --enable-source-maps ./bin/hook.js\" };":
+    labels:
+    - source: "command: \"node --enable-source-maps ./bin/hook.js\""
+      style: primary
+      start: 15
+      end: 65
+    - source: command
+      style: secondary
+      start: 15
+      end: 22
+    - source: "\"node --enable-source-maps ./bin/hook.js\""
+      style: secondary
+      start: 24
+      end: 65
+    - source: hook
+      style: secondary
+      start: 6
+      end: 10
+    - source: "hook = { command: \"node --enable-source-maps ./bin/hook.js\" }"
+      style: secondary
+      start: 6
+      end: 67
+    - source: "{ command: \"node --enable-source-maps ./bin/hook.js\" }"
+      style: secondary
+      start: 13
+      end: 67
   "const hook = { command: \"node ./script.js\" };":
     labels:
     - source: "command: \"node ./script.js\""
@@ -220,6 +250,10 @@ snapshots:
       style: secondary
       start: 0
       end: 76
+    - source: const legacy = "argocd-axi context end";
+      style: secondary
+      start: 0
+      end: 40
   "const markerCommand = `argo-workflows-axi context end # ${MARKER}`; hooks.push({ type: \"command\", command: markerCommand });":
     labels:
     - source: "markerCommand = `argo-workflows-axi context end # ${MARKER}`"
@@ -254,3 +288,7 @@ snapshots:
       style: secondary
       start: 0
       end: 124
+    - source: "const markerCommand = `argo-workflows-axi context end # ${MARKER}`;"
+      style: secondary
+      start: 0
+      end: 67

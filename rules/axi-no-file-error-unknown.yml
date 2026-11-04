@@ -24,6 +24,14 @@ utils:
           - has:
               stopBy: end
               regex: '^["\x27](EACCES|EPERM|EROFS)["\x27]$'
+  typed-exit:
+    all:
+      - any:
+          - kind: throw_statement
+          - kind: return_statement
+      - regex: '["\x27](FILE_ERROR|CONFIG_ERROR|CONFIG_INVALID|SETUP_FAILED)["\x27]'
+      - not:
+          regex: '["\x27]UNKNOWN["\x27]'
   classified-branch:
     all:
       - kind: if_statement
@@ -32,6 +40,14 @@ utils:
           has:
             stopBy: end
             matches: file-classifier
+      - has:
+          field: consequence
+          any:
+            - matches: typed-exit
+            - all:
+                - kind: statement_block
+                - has:
+                    matches: typed-exit
 rule:
   all:
     - any:

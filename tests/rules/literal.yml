@@ -6,6 +6,8 @@ valid:
   - 'function statusName(s) { return s === "installed"; }'
   - 'function unexpected() { return { installed: true }; }'
 invalid:
+  - 'class Tool { setup() { return { installed: true }; } }'
+  - 'const tool = { setup() { return { installed: true }; } };'
   - 'const setupHooks = () => ({ installed: true });'
   - 'function setup() { return { session_end: "installed" }; }'
   - 'function setup() { return { nested: { "installed": true } }; }'

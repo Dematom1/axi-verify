@@ -30,6 +30,28 @@ snapshots:
       style: secondary
       start: 37
       end: 100
+  "try { readFileSync(path); } catch (e) { if (e.code === \"EACCES\") console.error(e); throw axiError(\"Unexpected\", \"UNKNOWN\"); }":
+    labels:
+    - source: >-
+        catch (e) { if (e.code === "EACCES") console.error(e); throw
+        axiError("Unexpected", "UNKNOWN"); }
+      style: primary
+      start: 28
+      end: 125
+    - source: readFileSync
+      style: secondary
+      start: 6
+      end: 18
+    - source: readFileSync(path)
+      style: secondary
+      start: 6
+      end: 24
+    - source: >-
+        try { readFileSync(path); } catch (e) { if (e.code === "EACCES")
+        console.error(e); throw axiError("Unexpected", "UNKNOWN"); }
+      style: secondary
+      start: 0
+      end: 125
   "try { readFileSync(path); } catch (e) { throw axiError(\"Cannot read\", \"UNKNOWN\"); }":
     labels:
     - source: catch (e) { throw axiError("Cannot read", "UNKNOWN"); }

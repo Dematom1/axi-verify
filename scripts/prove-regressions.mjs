@@ -71,6 +71,10 @@ function row(summary, id) {
   return result;
 }
 try {
+  if (process.argv[3]) {
+    const manifest = JSON.parse((await checked("tar", ["-xOzf", resolve(process.argv[3]), "package/package.json"])).stdout);
+    assert.equal(manifest.gitHead, "e069c3a269cd1850ae2d155bb3993410946955e2", "historical Terraform pack must identify the exact pre-fix source");
+  }
   const bad = await fetchArchive("argocd-axi@0.1.8");
   const good = await fetchArchive("argocd-axi@0.1.13");
   const red = await verifyPacked({

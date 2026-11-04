@@ -168,7 +168,9 @@ try {
     assert.equal(newInstall.decoded.code, "SETUP_FAILED");
     proofs.push({
       id: "argo-denied-install-exit-and-code",
-      source: manifest.gitHead,
+      sourceClaim: manifest.gitHead,
+      sourceContentVerified: false,
+      sourceVerification: "manifest gitHead only; archive content not verified against source",
       bad: "historical unpublished local pack, version 0.1.12",
       fixed: "argo-workflows-axi@0.1.14",
       red: "denied Codex install exited zero",
@@ -221,7 +223,9 @@ try {
         );
       proofs.push({
         id: "terraform-" + id,
-        source: "e069c3a269cd1850ae2d155bb3993410946955e2",
+        sourceClaim: "e069c3a269cd1850ae2d155bb3993410946955e2",
+        sourceContentVerified: false,
+        sourceVerification: "manifest gitHead only; archive content not verified against source",
         bad: "historical unpublished local pack",
         fixed: "terraform-axi@0.1.0",
         red: "failed mutation exited zero",

@@ -8,6 +8,10 @@ valid:
   - 'function setup() { return { hooks: { command: "datadog-axi-ctx (local config only)" } }; }'
   - 'const hook = { command: "node /absolute/script.js" };'
   - 'const command = "argocd-axi context end"; function setup() { const command = absolute; const hook = { command }; }'
+  - 'const command = "argocd-axi context end"; function setup(command: string) { const hook = { command }; }'
+  - 'const command = "argocd-axi context end"; const setup = command => ({ type: "command", command });'
+  - 'const command = "argocd-axi context end"; const setup = (command = absolute) => ({ type: "command", command });'
+  - 'const command = "argocd-axi context end"; const tool = { setup(command) { const hook = { command }; } };'
 invalid:
   - 'const hook = { command: "node --enable-source-maps ./bin/hook.js" };'
   - 'const hook = { command: "node ./script.js" };'

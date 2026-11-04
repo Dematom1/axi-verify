@@ -28,6 +28,26 @@ utils:
                 has:
                   field: function
                   regex: '(hook|Hook)'
+  parameter-shadow:
+    all:
+      - any:
+          - kind: function_declaration
+          - kind: function_expression
+          - kind: arrow_function
+          - kind: method_definition
+      - any:
+          - has:
+              field: parameters
+              has:
+                any:
+                  - kind: required_parameter
+                  - kind: optional_parameter
+                has:
+                  field: pattern
+                  pattern: $COMMAND
+          - has:
+              field: parameter
+              pattern: $COMMAND
   hook-reference:
     all:
       - any:
@@ -86,6 +106,10 @@ rule:
                         stopBy: end
                         all:
                           - matches: hook-reference
+                          - not:
+                              inside:
+                                stopBy: end
+                                matches: parameter-shadow
                           - not:
                               inside:
                                 stopBy: end

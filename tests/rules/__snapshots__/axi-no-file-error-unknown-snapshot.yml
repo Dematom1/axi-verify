@@ -1,5 +1,62 @@
 id: axi-no-file-error-unknown
 snapshots:
+  "function formatError(e) { if (other.code === \"EACCES\") return renderError(\"Other error\", \"FILE_ERROR\", help); return renderError(\"Unexpected\", \"UNKNOWN\", []); }":
+    labels:
+    - source: >-
+        function formatError(e) { if (other.code === "EACCES") return
+        renderError("Other error", "FILE_ERROR", help); return renderError("Unexpected", "UNKNOWN", []); }
+      style: primary
+      start: 0
+      end: 160
+    - source: formatError
+      style: secondary
+      start: 9
+      end: 20
+    - source: e
+      style: secondary
+      start: 21
+      end: 22
+    - source: e
+      style: secondary
+      start: 21
+      end: 22
+    - source: e
+      style: secondary
+      start: 21
+      end: 22
+    - source: renderError("Unexpected", "UNKNOWN", [])
+      style: secondary
+      start: 117
+      end: 157
+  "function formatError(e, other) { if (other.code === \"EACCES\") return renderError(\"Other error\", \"FILE_ERROR\", help); return renderError(\"Unexpected\", \"UNKNOWN\", []); }":
+    labels:
+    - source: >-
+        function formatError(e, other) { if (other.code === "EACCES") return
+        renderError("Other error", "FILE_ERROR", help); return renderError("Unexpected", "UNKNOWN",
+        []); }
+      style: primary
+      start: 0
+      end: 167
+    - source: formatError
+      style: secondary
+      start: 9
+      end: 20
+    - source: e
+      style: secondary
+      start: 21
+      end: 22
+    - source: e
+      style: secondary
+      start: 21
+      end: 22
+    - source: e
+      style: secondary
+      start: 21
+      end: 22
+    - source: renderError("Unexpected", "UNKNOWN", [])
+      style: secondary
+      start: 124
+      end: 164
   "function formatError(error) { if (error instanceof AxiError) return typed(error); return { output: renderError(\"unexpected\", \"UNKNOWN\", []), exitCode: 1 }; }":
     labels:
     - source: "function formatError(error) { if (error instanceof AxiError) return typed(error); return { output: renderError(\"unexpected\", \"UNKNOWN\", []), exitCode: 1 }; }"
@@ -10,6 +67,18 @@ snapshots:
       style: secondary
       start: 9
       end: 20
+    - source: error
+      style: secondary
+      start: 21
+      end: 26
+    - source: error
+      style: secondary
+      start: 21
+      end: 26
+    - source: error
+      style: secondary
+      start: 21
+      end: 26
     - source: renderError("unexpected", "UNKNOWN", [])
       style: secondary
       start: 99
@@ -26,10 +95,49 @@ snapshots:
       style: secondary
       start: 9
       end: 20
+    - source: error
+      style: secondary
+      start: 21
+      end: 26
+    - source: error
+      style: secondary
+      start: 21
+      end: 26
+    - source: error
+      style: secondary
+      start: 21
+      end: 26
     - source: renderError("unexpected", "UNKNOWN", ["check EACCES or EPERM"])
       style: secondary
       start: 37
       end: 100
+  "try { readFileSync(path); } catch (e) { function nested(e) { if (e.code === \"EACCES\") throw axiError(\"Nested\", \"FILE_ERROR\"); } throw axiError(\"Unexpected\", \"UNKNOWN\"); }":
+    labels:
+    - source: >-
+        catch (e) { function nested(e) { if (e.code === "EACCES") throw
+        axiError("Nested", "FILE_ERROR"); } throw axiError("Unexpected", "UNKNOWN"); }
+      style: primary
+      start: 28
+      end: 170
+    - source: readFileSync
+      style: secondary
+      start: 6
+      end: 18
+    - source: readFileSync(path)
+      style: secondary
+      start: 6
+      end: 24
+    - source: >-
+        try { readFileSync(path); } catch (e) { function nested(e) { if (e.code ===
+        "EACCES") throw axiError("Nested", "FILE_ERROR"); } throw axiError("Unexpected",
+        "UNKNOWN"); }
+      style: secondary
+      start: 0
+      end: 170
+    - source: e
+      style: secondary
+      start: 35
+      end: 36
   "try { readFileSync(path); } catch (e) { if (e.code === \"EACCES\") console.error(e); throw axiError(\"Unexpected\", \"UNKNOWN\"); }":
     labels:
     - source: >-
@@ -52,6 +160,36 @@ snapshots:
       style: secondary
       start: 0
       end: 125
+    - source: e
+      style: secondary
+      start: 35
+      end: 36
+  "try { readFileSync(path); } catch (e) { if (other.code === \"EACCES\") throw axiError(\"Other error\", \"FILE_ERROR\"); throw axiError(\"Unexpected\", \"UNKNOWN\"); }":
+    labels:
+    - source: >-
+        catch (e) { if (other.code === "EACCES") throw axiError("Other error",
+        "FILE_ERROR"); throw axiError("Unexpected", "UNKNOWN"); }
+      style: primary
+      start: 28
+      end: 156
+    - source: readFileSync
+      style: secondary
+      start: 6
+      end: 18
+    - source: readFileSync(path)
+      style: secondary
+      start: 6
+      end: 24
+    - source: >-
+        try { readFileSync(path); } catch (e) { if (other.code === "EACCES") throw
+        axiError("Other error", "FILE_ERROR"); throw axiError("Unexpected", "UNKNOWN"); }
+      style: secondary
+      start: 0
+      end: 156
+    - source: e
+      style: secondary
+      start: 35
+      end: 36
   "try { readFileSync(path); } catch (e) { throw axiError(\"Cannot read\", \"UNKNOWN\"); }":
     labels:
     - source: catch (e) { throw axiError("Cannot read", "UNKNOWN"); }
@@ -72,3 +210,25 @@ snapshots:
       style: secondary
       start: 0
       end: 83
+    - source: e
+      style: secondary
+      start: 35
+      end: 36
+  "try { readFileSync(path); } catch { throw axiError(\"Unexpected\", \"UNKNOWN\"); }":
+    labels:
+    - source: catch { throw axiError("Unexpected", "UNKNOWN"); }
+      style: primary
+      start: 28
+      end: 78
+    - source: readFileSync
+      style: secondary
+      start: 6
+      end: 18
+    - source: readFileSync(path)
+      style: secondary
+      start: 6
+      end: 24
+    - source: try { readFileSync(path); } catch { throw axiError("Unexpected", "UNKNOWN"); }
+      style: secondary
+      start: 0
+      end: 78

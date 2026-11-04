@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import * as fs from 'node:fs/promises';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { cleanup, checked, json, processResult, sandbox, scratch } from '../lib/lab.mjs';
 import { managedState, noUnexpectedIO } from '../lib/observations.mjs';
 import { proveHistory } from '../scripts/prove-history.mjs';
@@ -53,6 +53,22 @@ test('static history proof refuses repository-local evidence without creating it
   const destination = join(source, '.axi-evidence', 'forbidden-history-proof');
   await assert.rejects(proveHistory(destination), /Evidence must be outside the repository/);
   await assert.rejects(fs.access(destination), { code: 'ENOENT' });
+});
+test('static history proof rejects symlinked repository evidence, including missing descendants', async () => {
+  const root = await scratch(), repo = join(root, 'repo'), alias = join(root, 'alias');
+  try {
+    await fs.mkdir(join(repo, 'scripts'), { recursive: true });
+    await fs.copyFile(join(source, 'scripts/prove-history.mjs'), join(repo, 'scripts/prove-history.mjs'));
+    await fs.symlink(join(source, 'lib'), join(repo, 'lib'), 'dir');
+    await fs.symlink(join(source, 'tests'), join(repo, 'tests'), 'dir');
+    await fs.symlink(repo, alias, 'dir');
+    const copied = await import(pathToFileURL(join(repo, 'scripts/prove-history.mjs')).href);
+    for (const tail of ['evidence-new', 'missing/descendant']) {
+      const output = join(alias, tail);
+      await assert.rejects(copied.proveHistory(output), /Evidence must be outside the repository/);
+      await assert.rejects(fs.access(output), { code: 'ENOENT' });
+    }
+  } finally { await cleanup(root); }
 });
 test('historical Terraform proof rejects an archive with false provenance before baseline work', async () => {
   const root = await scratch();

@@ -3,6 +3,18 @@ language: TypeScript
 severity: error
 message: Classify expected filesystem failures before an unexpected-error UNKNOWN fallback.
 utils:
+  filesystem-catch:
+    all:
+      - kind: catch_clause
+      - regex: '["\x27]UNKNOWN["\x27]'
+      - inside:
+          kind: try_statement
+          has:
+            stopBy: end
+            kind: call_expression
+            has:
+              field: function
+              regex: '(readFile|writeFile|unlink|mkdir|rename|stat)(Sync)?$'
   file-classifier:
     any:
       - all:
@@ -49,28 +61,43 @@ utils:
                 - has:
                     matches: typed-exit
 rule:
-  all:
-    - any:
-        - all:
-            - kind: catch_clause
-            - regex: '["\x27]UNKNOWN["\x27]'
-            - inside:
-                kind: try_statement
-                has:
-                  stopBy: end
-                  kind: call_expression
-                  has:
-                    field: function
-                    regex: '(readFile|writeFile|unlink|mkdir|rename|stat)(Sync)?$'
-        - all:
-            - kind: function_declaration
-            - has:
-                field: name
-                regex: '^(formatError|renderErrorFallback)$'
-            - has:
-                stopBy: end
-                pattern: renderError($MESSAGE, "UNKNOWN", $HELP)
-    - not:
-        has:
-          stopBy: end
-          matches: classified-branch
+  any:
+    - all:
+        - matches: filesystem-catch
+        - not:
+            has:
+              field: parameter
+              regex: '.'
+    - all:
+        - any:
+            - all:
+                - matches: filesystem-catch
+                - has:
+                    field: parameter
+                    pattern: $ERROR
+            - all:
+                - kind: function_declaration
+                - has:
+                    field: name
+                    regex: '^(formatError|renderErrorFallback)$'
+                - has:
+                    field: parameters
+                    has:
+                      kind: required_parameter
+                      nthChild: 1
+                      has:
+                        field: pattern
+                        pattern: $ERROR
+                - has:
+                    stopBy: end
+                    pattern: renderError($MESSAGE, "UNKNOWN", $HELP)
+        - not:
+            has:
+              stopBy:
+                any:
+                  - kind: catch_clause
+                  - kind: function_declaration
+                  - kind: function_expression
+                  - kind: arrow_function
+                  - kind: method_definition
+              matches: classified-branch

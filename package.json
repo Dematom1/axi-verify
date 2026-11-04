@@ -13,7 +13,8 @@
     "check": "npm test",
     "proof:history": "node scripts/prove-history.mjs",
     "proof:published": "node scripts/prove-published.mjs",
-    "proof:runtime": "node scripts/prove-regressions.mjs"
+    "proof:runtime": "node scripts/prove-regressions.mjs",
+    "proof:idempotency": "node scripts/prove-idempotency.mjs"
   },
   "dependencies": {
     "@ast-grep/cli": "0.51.1",

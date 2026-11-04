@@ -202,7 +202,7 @@ test("Datadog fixture rejects a monitor-search path prefix instead of the exact 
       { env, cwd: source, timeout: 180_000 },
     );
     assert.equal(result.exit, 1);
-    assert.match(result.decoded.error, /unexpected Datadog HTTP request/);
+    assert(result.decoded.failures.some((row) => /unexpected fixture HTTP request/.test(row.error)), "unexpected HTTP requests must fail their tool rows");
   } finally {
     await cleanup(root);
   }

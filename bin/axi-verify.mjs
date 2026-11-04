@@ -5,19 +5,20 @@ const manifest = JSON.parse(
   await readFile(new URL("../package.json", import.meta.url), "utf8"),
 );
 const args = process.argv.slice(2);
+const commands = ["packed", "static"];
 if (args.length === 1 && ["--version", "-v", "-V"].includes(args[0])) {
   process.stdout.write(manifest.version + "\n");
 } else {
   const { encode } = await import("@toon-format/toon");
   const output = (value) => process.stdout.write(encode(value) + "\n");
   const help =
-    "axi-verify packed [--tarball <absolute.tgz>] [--expected-git-head <40-char-sha>] [--evidence-dir <path>] | static";
+    "axi-verify packed [--tarball <absolute.tgz>] [--expected-git-head <40-char-sha>] [--evidence-dir <path>] [--family idempotency] | static";
   try {
     if (
       args.length === 0 ||
       (args.length === 1 && args[0] === "--help") ||
       (args.length === 2 &&
-        ["packed", "static"].includes(args[0]) &&
+        commands.includes(args[0]) &&
         args[1] === "--help")
     ) {
       output({
@@ -29,12 +30,13 @@ if (args.length === 1 && ["--version", "-v", "-V"].includes(args[0])) {
     } else {
       const [command, ...rest] = args;
       const options = {};
-      if (!["packed", "static"].includes(command))
+      if (!commands.includes(command))
         throw new TypeError(`Unknown command ${command}`);
       const flags = {
         "--tarball": "tarball",
         "--expected-git-head": "expectedGitHead",
         "--evidence-dir": "evidenceDir",
+        "--family": "family",
       };
       while (rest.length) {
         const flag = rest.shift();
@@ -49,6 +51,8 @@ if (args.length === 1 && ["--version", "-v", "-V"].includes(args[0])) {
           throw new TypeError(`Supply ${flag} exactly once with a value`);
         options[flags[flag]] = value;
       }
+      if (options.family && options.family !== "idempotency")
+        throw new TypeError("--family must be idempotency (omit for all checks)");
       if (options.expectedGitHead && !options.tarball)
         throw new TypeError(
           "--expected-git-head requires --tarball (never repack a release artifact)",
@@ -66,6 +70,7 @@ if (args.length === 1 && ["--version", "-v", "-V"].includes(args[0])) {
               rows: result.rows.length,
               failures: result.failures,
               known_limitations: result.knownLimitations,
+              retry_limits: result.retryLimits,
               evidence: result.evidence,
             }
           : result,

@@ -5,8 +5,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { sandbox, scratch, cleanup, observe, json } from "../lib/lab.mjs";
 import { checkRetry } from "../lib/idempotency.mjs";
-import { profiles } from "../lib/profiles.mjs";
-import { advertisedRoutes, commandInventory } from "../lib/command-inventory.mjs";
+import { commandInventory } from "../lib/command-inventory.mjs";
 
 const tool = fileURLToPath(new URL("../fixtures/retry-tool.mjs", import.meta.url));
 const scenario = (transient = false) => ({ steps: [
@@ -85,24 +84,53 @@ test("keyring and package installers cannot reach host state", async () => {
   } finally { await cleanup(root); }
 });
 
-test("registry coverage rejects a newly registered nested command", async () => {
+test("executable operation registry rejects a missing write, a read mislabeled as a write, and parent-only coverage", async () => {
   const root = await scratch();
   try {
-    const lab = await sandbox(root), bin = join(lab.bin, "inventory-fixture");
-    lab.packageRoot = root;
-    await fs.writeFile(bin, '#!/usr/bin/env node\nconsole.log(JSON.stringify({routes:["", "read", "group", "group add", "update"]}));\n');
+    const lab = await sandbox(root);
+    lab.packageRoot = join(root, "registered-tool");
+    const sdk = join(lab.packageRoot, "node_modules", "axi-sdk-js");
+    await fs.mkdir(join(lab.packageRoot, "dist", "src"), { recursive: true });
+    await fs.mkdir(sdk, { recursive: true });
+    await json(join(lab.packageRoot, "package.json"), { type: "module" });
+    await json(join(sdk, "package.json"), { type: "module", exports: { ".": { import: "./index.mjs" } } });
+    await fs.writeFile(join(sdk, "index.mjs"), 'export const runAxiCli = () => { throw new Error("SDK boundary was not intercepted"); };');
+    await fs.writeFile(join(sdk, "cli.js"), 'export const RESERVED_COMMANDS = ["update"];');
+    await fs.writeFile(join(lab.packageRoot, "dist", "src", "registry.js"), 'export const OPERATIONS = {"app sync": {tier:"write", argv:["app","sync"]}, "app secret": {tier:"write", argv:["app","secret"]}}; export const REFUSALS = {};');
+    const bin = join(lab.packageRoot, "tool.mjs");
+    await fs.writeFile(bin, '#!/usr/bin/env node\nimport {runAxiCli} from "axi-sdk-js"; await runAxiCli({commands:{apps:(args)=>args.length===1?"command: apps\\nsubcommands[1]:\\n  - secret <name>: New write\\n":"command: apps secret"},home:()=>""});');
     await fs.chmod(bin, 0o755);
-    const profile = { idempotency: [[], ["read"], ["group"], ["update", "--check"]].map((argv) => ({ kind: "read", argv })) };
-    const options = { bin, name: "fixture", profile, lab, invoke: (bin, args, target, extras) => observe(bin, args, target, extras) };
-    await assert.rejects(commandInventory(options), /missing retry fixtures: group add/);
-    profile.idempotency.push({ kind: "write", argv: ["group", "add"] });
-    assert((await commandInventory(options)).routes.includes("group add"));
-    assert.deepEqual(advertisedRoutes('command: tool group\nsubcommands[1]:\n  - add <name>: Create a thing\n', "group", ["group"], "tool"), ["group", "group add"]);
+    const profile = { idempotency: ["", "apps", "update"].map((route) => ({ kind: "read", route, argv: route ? [route] : [] })) };
+    const options = { bin, name: "argocd-axi", profile, lab, invoke: (bin, args, target, extras) => observe(bin, args, target, extras) };
+    await assert.rejects(commandInventory(options), /missing retry fixtures: apps secret/);
+    profile.idempotency.push({ kind: "read", route: "apps secret", argv: ["apps", "secret"] });
+    await assert.rejects(commandInventory(options), /permitted write operation: app sync/);
+    const write = (verb) => ({ kind: "write", route: `apps ${verb}`, argv: ["apps", verb], operations: [`app ${verb}`], native: { steps: [{ bin: "argocd", argv: ["app", verb], mutation: true, operation: `app ${verb}` }] } });
+    profile.idempotency.push(write("sync"));
+    await assert.rejects(commandInventory(options), /permitted write operation: app secret/);
+    profile.idempotency.push({ ...write("secret"), kind: "event" });
+    await assert.rejects(commandInventory(options), /needs an event\/reconcile reason/);
+    profile.idempotency.at(-1).limit = "Explicitly new delivery on every invocation";
+    const result = await commandInventory(options);
+    assert.equal(result.coverage.permittedWrites, 2);
+    assert.equal(result.coverage.writeFixtures, 1);
+    assert.equal(result.coverage.events, 1);
   } finally { await cleanup(root); }
 });
 
-test("every owned tool declares retry rows; tools with no writes have none", () => {
-  assert.equal(Object.keys(profiles).length, 7);
-  for (const profile of Object.values(profiles)) assert(profile.idempotency.some((r) => r.kind === "read"));
-  assert(!profiles["axi-verify"].idempotency.some((r) => r.kind === "write"));
+test("own executable command registry enforces declared lifecycle absence", async () => {
+  const root = await scratch();
+  try {
+    const lab = await sandbox(root);
+    lab.packageRoot = root;
+    await fs.mkdir(join(root, "lib"));
+    await fs.writeFile(join(root, "lib", "commands.mjs"), 'export const commands = ["static", "setup"];');
+    const profile = { lifecycle: { setup: false, uninstall: false }, idempotency: ["", "static", "setup"].map((route) => ({ kind: "read", route, argv: route ? [route] : [] })) };
+    await assert.rejects(commandInventory({ name: "axi-verify", profile, lab }), /setup lifecycle registration changed/);
+    profile.lifecycle.setup = true;
+    await assert.rejects(commandInventory({ name: "axi-verify", profile, lab }), /missing setup lifecycle fixture/);
+    profile.idempotency.at(-1).kind = "setup";
+    const result = await commandInventory({ name: "axi-verify", profile, lab });
+    assert.deepEqual(result.coverage.lifecycle, { setup: true, uninstall: false });
+  } finally { await cleanup(root); }
 });

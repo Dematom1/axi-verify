@@ -1,9 +1,38 @@
 #!/usr/bin/env node
-import { appendFileSync } from "node:fs";
-import { basename } from "node:path";
-import { retryExternal } from "./retry-external.mjs";
+import { appendFileSync, readFileSync, writeFileSync, lstatSync, renameSync } from "node:fs";
+import { basename, dirname, resolve, join } from "node:path";
+import { tmpdir } from "node:os";
+import { parse } from "yaml";
 import { kubernetesReply } from "./kubernetes.mjs";
 import { updateFixture } from "./update.mjs";
+// Exact native fixture vectors only; observation of an operation is independent
+// of the wrapper's reported status. Unknown calls fall through to fail closed.
+function retryExternal(bin, args) {
+  const file = process.env.AXI_RETRY_SCENARIO;
+  if (!file) return;
+  const scenario = JSON.parse(readFileSync(file, "utf8"));
+  const matches = (expected, actual) => {
+    if (typeof expected === "string") return expected === actual;
+    if (!expected.manifest || typeof actual !== "string") return false;
+    const path = resolve(actual), directory = dirname(path);
+    if (!directory.startsWith(join(tmpdir(), "argo-workflows-axi-")) || basename(path) !== "workflow.yaml" || !lstatSync(path).isFile()) return false;
+    const value = parse(readFileSync(path, "utf8"));
+    return value.kind === "Workflow" && value.metadata?.name === expected.manifest;
+  };
+  const step = scenario.steps.find((s) => s.bin === bin && s.argv.length === args.length && s.argv.every((value, i) => matches(value, args[i])));
+  if (!step) return;
+  const state = scenario.state ?? "initial", reply = step.states?.[state] ?? step;
+  appendFileSync(process.env.AXI_FIXTURE_LOG, JSON.stringify({ bin, args, allowed: true, mutation: step.mutation === true, poll: step.poll === true, operation: step.operation, nativeExit: reply.exit ?? 0, state }) + "\n");
+  if (reply.next) {
+    scenario.state = reply.next;
+    const temporary = `${file}.${process.pid}.tmp`;
+    writeFileSync(temporary, JSON.stringify(scenario));
+    renameSync(temporary, file);
+  }
+  if (reply.stderr) process.stderr.write(reply.stderr);
+  if (reply.stdout !== undefined) process.stdout.write(typeof reply.stdout === "string" ? reply.stdout : JSON.stringify(reply.stdout));
+  process.exit(reply.exit ?? 0);
+}
 const bin = basename(process.argv[1]);
 const args = process.argv.slice(2),
   text = args.join(" ");

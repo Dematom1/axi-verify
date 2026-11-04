@@ -5,7 +5,7 @@ const manifest = JSON.parse(
   await readFile(new URL("../package.json", import.meta.url), "utf8"),
 );
 const args = process.argv.slice(2);
-const commands = ["packed", "static"];
+const { commands } = await import("../lib/commands.mjs");
 if (args.length === 1 && ["--version", "-v", "-V"].includes(args[0])) {
   process.stdout.write(manifest.version + "\n");
 } else {
@@ -68,6 +68,7 @@ if (args.length === 1 && ["--version", "-v", "-V"].includes(args[0])) {
               failures: result.failures,
               known_limitations: result.knownLimitations,
               retry_limits: result.retryLimits,
+              retry_coverage: result.retryCoverage,
               evidence: result.evidence,
             }
           : result,

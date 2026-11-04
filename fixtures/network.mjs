@@ -65,17 +65,7 @@ for (const api of [
       key === "reverse" ||
       key.startsWith("resolve")
     ) {
-      if (key === "lookup" && process.env.AXI_FIXTURE_SERVER_LISTEN === "1") {
-        const lookup = api[key];
-        api[key] = function (...args) {
-          // Node resolves a literal IPv4 address without contacting DNS.
-          if (args[0] === "127.0.0.1") {
-            record({ kind: "fixture-listen-address", allowed: true });
-            return lookup.apply(this, args);
-          }
-          return refuse(`dns:${key}`)();
-        };
-      } else api[key] = refuse(`dns:${key}`);
+      api[key] = refuse(`dns:${key}`);
     }
   }
 }

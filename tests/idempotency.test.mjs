@@ -64,6 +64,24 @@ test("double-act and same-content rewrites are red", async () => {
   await assert.rejects(run("read", "elapsed-state", false, false, timeText), /repeat output changed/);
 });
 
+test("backend operation witness follows recorded executable and argv, not a fixture label", async () => {
+  async function retryWith(operationArgv) {
+    const root = await scratch();
+    try {
+      const lab = await sandbox(root), native = scenario();
+      native.steps[1].operation = "expected"; // Deliberately forged metadata must not supply the witness.
+      lab.env.AXI_RETRY_SCENARIO = join(lab.base, "scenario.json");
+      await json(lab.env.AXI_RETRY_SCENARIO, native);
+      return await checkRetry({ bin: process.execPath, fixture: { kind: "write", argv: [tool, "write"], native, operations: ["expected"] }, lab,
+        writeOperations: [{ id: "expected", bin: "argocd", argv: operationArgv }],
+        invoke: (...args) => observe(...args),
+      });
+    } finally { await cleanup(root); }
+  }
+  await assert.rejects(retryWith(["fixture", "different-write"]), /did not exercise registered operation expected/);
+  assert.deepEqual((await retryWith(["fixture", "set"])).observedOperations, [["expected"], []]);
+});
+
 test("package installer shim rejects an unregistered install", async () => {
   const root = await scratch();
   try {
@@ -94,7 +112,7 @@ test("executable operation registry rejects a missing write, a read mislabeled a
     await assert.rejects(commandInventory(options), /missing retry fixtures: apps secret/);
     profile.idempotency.push({ kind: "read", route: "apps secret", argv: ["apps", "secret"] });
     await assert.rejects(commandInventory(options), /permitted write operation: app sync/);
-    const write = (verb) => ({ kind: "write", route: `apps ${verb}`, argv: ["apps", verb], operations: [`app ${verb}`], native: { steps: [{ bin: "argocd", argv: ["app", verb], mutation: true, operation: `app ${verb}` }] } });
+    const write = (verb) => ({ kind: "write", route: `apps ${verb}`, argv: ["apps", verb], operations: [`app ${verb}`], native: { steps: [{ bin: "argocd", argv: ["app", verb], mutation: true }] } });
     profile.idempotency.push(write("sync"));
     await assert.rejects(commandInventory(options), /permitted write operation: app secret/);
     profile.idempotency.push({ ...write("secret"), kind: "event" });

@@ -22,7 +22,7 @@ function retryExternal(bin, args) {
   const step = scenario.steps.find((s) => s.bin === bin && s.argv.length === args.length && s.argv.every((value, i) => matches(value, args[i])));
   if (!step) return;
   const state = scenario.state ?? "initial", reply = step.states?.[state] ?? step;
-  appendFileSync(process.env.AXI_FIXTURE_LOG, JSON.stringify({ bin, args, allowed: true, mutation: step.mutation === true, poll: step.poll === true, operation: step.operation, nativeExit: reply.exit ?? 0, state }) + "\n");
+  appendFileSync(process.env.AXI_FIXTURE_LOG, JSON.stringify({ bin, args, allowed: true, mutation: step.mutation === true, poll: step.poll === true, nativeExit: reply.exit ?? 0, state }) + "\n");
   if (reply.next) {
     scenario.state = reply.next;
     const temporary = `${file}.${process.pid}.tmp`;

@@ -5,6 +5,7 @@ const manifest = JSON.parse(
   await readFile(new URL("../package.json", import.meta.url), "utf8"),
 );
 const args = process.argv.slice(2);
+const { commands } = await import("../lib/commands.mjs");
 if (args.length === 1 && ["--version", "-v", "-V"].includes(args[0])) {
   process.stdout.write(manifest.version + "\n");
 } else {
@@ -17,7 +18,7 @@ if (args.length === 1 && ["--version", "-v", "-V"].includes(args[0])) {
       args.length === 0 ||
       (args.length === 1 && args[0] === "--help") ||
       (args.length === 2 &&
-        ["packed", "static"].includes(args[0]) &&
+        commands.includes(args[0]) &&
         args[1] === "--help")
     ) {
       output({
@@ -29,7 +30,7 @@ if (args.length === 1 && ["--version", "-v", "-V"].includes(args[0])) {
     } else {
       const [command, ...rest] = args;
       const options = {};
-      if (!["packed", "static"].includes(command))
+      if (!commands.includes(command))
         throw new TypeError(`Unknown command ${command}`);
       const flags = {
         "--tarball": "tarball",
@@ -65,7 +66,10 @@ if (args.length === 1 && ["--version", "-v", "-V"].includes(args[0])) {
               passed: result.passed,
               rows: result.rows.length,
               failures: result.failures,
+              unexpected_http: result.unexpectedHttp,
               known_limitations: result.knownLimitations,
+              retry_limits: result.retryLimits,
+              retry_coverage: result.retryCoverage,
               evidence: result.evidence,
             }
           : result,

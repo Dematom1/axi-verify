@@ -30,7 +30,7 @@ Commands return TOON on stdout. Exit codes are 0 for a passing suite or help, 1 
 
 ## Supported profiles
 
-`lib/profiles.mjs` selects the profile by the archive's package name. Unknown names fail. Profiles define actual commands, help routes, structured failure codes, and list fields:
+`lib/profiles.mjs` selects the profile by the archive's package name. Unknown names fail. Profiles define actual commands, help routes, structured failure codes, list fields, and retry fixtures:
 
 - `argocd-axi`: applications, local context allowlist, and session hooks.
 - `argo-workflows-axi`: workflows and session hooks. `setup status` is unsupported.
@@ -38,14 +38,35 @@ Commands return TOON on stdout. Exit codes are 0 for a passing suite or help, 1 
 - `terraform-axi`: resource addresses and types, local binary configuration, and SessionStart integrations. No SessionEnd feature is required.
 - `search-console-axi`: local credential registration and the two-field `setup check` sites list. The current home command returns site counts and analytics, not that list. `setup hooks` must remain unsupported.
 - `k8s-axi`: pod diagnostics and session hooks. Its local pack does not establish npm publication.
+- `axi-verify`: static checks, help and version. Its executable command registry declares no setup or uninstall; packed verification is classified as repeatable reconciliation, not recursively invoked.
 
 The normal-command checks exercise each profile's listed commands before and after setup, plus help and version. They are regression samples, not exhaustive coverage of every argument combination.
+
+## Idempotency checks
+
+`lib/retry-profiles.mjs` declares exact command routes, operation IDs, arguments, input and fixture state. The inventory imports each installed tool's executable operation/refusal tables directly, independently of help and process output. Every permitted write ID needs a twice-run native fixture or an event/reconcile fixture with a reason; the expected native operation must actually be observed. Operation witnesses come from the backend call log's executable and full argv, never fixture-supplied operation labels. Argo's shared `submit` command is distinguished by its reserved deterministic-resubmit label; refresh requires its explicit refresh flag. A read or generated `--help` row cannot cover a write. Local write routes are explicit profile adapters for the registered wrapper commands, since the SDK command map has no write-tier metadata. New registered or advertised command routes require exact classification; a parent fixture cannot cover a new child. Advertised routes must have explicit profile declarations; discovery never generates read/help fixtures or supplies operation coverage. This is bounded operation/command coverage, not proof of every argument combination.
+
+Each fixture has its own HOME, XDG paths, working directory, native state, and call log. Auxiliary context bins have explicit read fixtures too. The new writable-grant fixture uses a real terminal through Python 3.9 or later's standard-library `pty` module. Python runs in isolated mode, and no confirmation bypass is added. Both invocations share that fixture. Checks include:
+
+- Reads must exit 0, return identical stdout and stderr, submit no mutations, and leave wrapper files unchanged. Only declared structured time fields are ignored; each excluded field must still exist with its declared string type. The current declarations cover workflow-list `age` and application-wait elapsed text.
+- Desired-state native writes must establish the fixture's target state. A retry must exit 0, report `already-done` or `in-progress` with current state, submit no extra mutation, and rewrite no wrapper files. Reported state values must match each fixture's native phase/policy or persisted configuration, not merely contain a state-like key. A new writable grant is checked in the actual config immediately after the first invocation. Additional cases seed a committed mutation with a lost response, legitimate partial states, an uncommitted native failure followed by recovery, and persistent upstream authentication failures.
+- Waits include satisfied and transient fixtures. A satisfied retry must not repeat a poll or fire a positive-duration timeout. These checks use call and timer events, not a machine-dependent runtime threshold.
+- Setup and uninstall run twice. The second invocation must preserve file contents, modes, and modification times from the first invocation. Uninstall starts from an installed fixture.
+- Refusals preserve their documented nonzero exit and structured code. Neither invocation may call a backend or change files. Every executable registry refusal needs a refusal-class fixture; an HTTP wildcard pattern gets a concrete request sample, not a claim of exhaustive method/parameter coverage.
+
+File snapshots include SHA-256 content hashes, modes, and nanosecond modification times. Directory modes are checked too. Observation logs and synthetic native stores are excluded from wrapper state. Completed pairs retain both process results and their content snapshots, including failed commands.
+
+Refresh is repeatable reconciliation, including hard refresh. Resource actions have a state-scoped retry contract, not exactly-once delivery. A Progressing resource suppresses another submission, but a completed restart can run again. Concurrent retries before progress is visible are not certified. `axi-verify packed` is also reconciliation: it reruns verification and writes its explicitly requested evidence directory. Its explicit classification is reported without a recursive synthetic-tool invocation. The profile declares setup/uninstall absent, and registration of either without a lifecycle fixture fails.
+
+Update fixtures inject a registry response and a fake npm installer inside a disposable global prefix. They test an already-current version, the npm lookup fallback, and an upgrade followed by an already-current retry. The SDK's documented `already on the latest version` message is accepted for update only. No real installer or update runs. Kubernetes declares self-update as a refusal.
+
+The checks use the existing per-tool failure and known-limitation reporting. CLI `retry_coverage` and summary `retryCoverage` report permitted-write counts, write/event/reconcile coverage, operation IDs, local-write routes, refusal counts and lifecycle presence. The inventory evidence retains the actual operation/refusal tables. Datadog's empty write table and the read-only Terraform, Search Console and Kubernetes executable registries are reported explicitly; no backend write is invented. `retry_limits`/`retryLimits` keep event/reconciliation limits separate from SDK limitations. Use the default `packed` result's per-tool findings for each tool's fix PR; a published defect is not exempted. Archive identity and publication claims remain those recorded by `packed`.
 
 ## Packed contract
 
 The runner installs the exact archive with scripts disabled into a unique scratch prefix. It resolves every declared executable through npm's installed bin links and verifies executable permissions and target identity. Auxiliary context bins are invoked as local views, not treated as public version or help interfaces.
 
-Every row uses a fresh HOME and working directory. Child processes receive explicit agent, Google, npm, and Kubernetes paths, closed stdin, a timeout, and a bounded output buffer. Their PATH contains the fixture directory first (Node and synthetic upstream executables), followed only by `/bin` and `/usr/bin` for shell/npm compatibility. Startup verifies every named backend resolves to its fixture. Inherited credentials, Node options, and agent paths are discarded. Other commands present in those host directories and absolute host executable paths are not contained; this is not a subprocess sandbox.
+Every row uses a fresh HOME and working directory. Child processes receive explicit agent, Google, npm, and Kubernetes paths, closed stdin, a timeout, and a bounded output buffer. Data-command PATH contains the fixture directory first, including Node, native backends, and package-manager shims, followed only by `/bin` and `/usr/bin` for shell compatibility. Startup verifies every named backend resolves to its fixture. Inherited credentials, Node options, and agent paths are discarded. Other commands present in those host directories and absolute host executable paths are not contained; this is not a subprocess sandbox.
 
 Checks cover:
 
@@ -70,7 +91,7 @@ Known-limitation-only rows have `passed: false` but are listed separately from t
 
 ## External boundaries and safety
 
-No cluster, Argo CD server, Datadog account, Google account, or Terraform backend is used. The fixture-first PATH intercepts the named backends; other host commands in `/bin` and `/usr/bin` remain available. Datadog uses its loopback HTTP override. Search Console keeps real credential parsing and rendering, with only the Google client's request method replaced in a child-process preload. The Node preload rejects TCP connections except the fixture server's exact loopback port, and refuses Node UDP sends and DNS lookup/resolution calls. This covers only Node processes that receive `NODE_OPTIONS`; a child launched with an environment that removes it loads no preload and is not covered. The Datadog HTTP fixture additionally requires the exact monitor-search pathname. Fixture credentials are synthetic. Npm registry reads are confined to package acquisition and cache warmup, with package scripts disabled during installation.
+No cluster, Argo CD server, Datadog account, Google account, or Terraform backend is used. The fixture-first PATH intercepts the named backends; other host commands in `/bin` and `/usr/bin` remain available. Datadog uses its loopback HTTP override. Search Console keeps real credential parsing and rendering, with only the Google client's request method replaced in a child-process preload. The Node preload rejects TCP connections except the fixture server's exact loopback port, and refuses Node UDP sends and DNS lookup or resolution calls. Datadog keyring access uses a synthetic file store instead of the OS keychain. This covers only Node processes that receive `NODE_OPTIONS`; a child launched with an environment that removes it loads no preload and is not covered. The Datadog HTTP fixture permits only explicit read endpoints and search-style POST reads. Other paths and methods fail their rows. Fixture credentials are synthetic. Npm registry reads are confined to package acquisition and cache warmup, with package scripts disabled during installation.
 
 This is a regression verifier for trusted family packages, not an operating-system security sandbox for malicious archives. A package's local `npm pack` can run its existing lifecycle scripts. Absolute host executable paths and arbitrary native code are not contained.
 
@@ -80,7 +101,7 @@ Cleanup restores scratch modes and removes only the runner's scratch tree. Evide
 
 By default, evidence is written beneath `.axi-evidence/<timestamp>` in the caller's directory. `--evidence-dir` selects another location. Preserve it as a CI artifact even on failure.
 
-`identity.json` records the archive SHA-512, package version, source claim, archive `gitHead`, both manifests, runtime versions, platform, architecture, and uid. Numbered row files contain argv, the sanitized environment, process output and exit, decoded output, before/after filesystem metadata snapshots, probes, observations, and fixture request records. `summary.json` lists every verdict. A fatal prerequisite produces `fatal.json`, never a passing summary.
+`identity.json` records the archive SHA-512, package version, source claim, archive `gitHead`, both manifests, runtime versions, platform, architecture, and uid. Numbered row files contain argv, the sanitized environment, process output and exit, decoded output, before/after filesystem metadata snapshots, probes, observations, and fixture request records. `summary.json` lists every verdict. A final HTTP-request snapshot also contributes `unexpectedHttp` to the verdict, including rejected requests outside row slices; both summary and request evidence are retained on failure. Requests arriving after that final snapshot are outside this check. A fatal prerequisite produces `fatal.json`, never a passing summary.
 
 The published-proof script additionally saves registry metadata, archive bytes, and their verified registry integrity. It records the provenance-attestation URL but does not claim independent signature verification.
 

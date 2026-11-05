@@ -5,9 +5,19 @@
   "type": "module",
   "license": "MIT",
   "repository": "github:Dematom1/axi-verify",
-  "bin": { "axi-verify": "bin/axi-verify.mjs" },
-  "files": ["bin", "lib", "fixtures", "rules", "sgconfig.yml"],
-  "engines": { "node": ">=22.12" },
+  "bin": {
+    "axi-verify": "bin/axi-verify.mjs"
+  },
+  "files": [
+    "bin",
+    "lib",
+    "fixtures",
+    "rules",
+    "sgconfig.yml"
+  ],
+  "engines": {
+    "node": ">=22.12"
+  },
   "scripts": {
     "test": "node --test tests/*.test.mjs && ast-grep test -c sgconfig.yml",
     "check": "npm test",

@@ -26,8 +26,8 @@ import {
 import { profiles, profileFor } from "../lib/profiles.mjs";
 const cli = fileURLToPath(new URL("../bin/axi-verify.mjs", import.meta.url));
 
-test("six explicit profiles; unknown names fail closed", () => {
-  assert.equal(Object.keys(profiles).length, 6);
+test("seven explicit profiles; unknown names fail closed", () => {
+  assert.equal(Object.keys(profiles).length, 7);
   assert.throws(() => profileFor("unreviewed-tool"), /Unsupported package/);
 });
 test("real permission denial and ineffective-lock rejection", async () => {

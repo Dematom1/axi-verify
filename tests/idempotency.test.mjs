@@ -29,7 +29,8 @@ async function run(kind, broken, transient = false, seedDone = false, timeFields
     }
     await json(lab.env.AXI_RETRY_SCENARIO, { ...native, state: seedDone ? "done" : "initial" });
     const observations = [];
-    const result = await checkRetry({ bin: process.execPath, fixture: { kind, argv: [tool, kind === "refusal" && broken === "grant" ? "write" : kind], timeFields, native: broken === "grant" ? undefined : native, noMutation: seedDone, firstExit: recover ? 1 : undefined, firstPTY, input: firstPTY ? "y\n" : "", repeatMutation: kind === "event", firstMutations: kind === "event" ? 1 : undefined }, lab,
+    const result = await checkRetry({ bin: process.execPath, fixture: { kind, argv: [tool, kind === "refusal" && broken === "grant" ? "write" : kind], timeFields, native: broken === "grant" ? undefined : native, noMutation: seedDone, firstExit: recover ? 1 : undefined, firstPTY, input: firstPTY ? "y\n" : "", repeatMutation: kind === "event", firstMutations: kind === "event" ? 1 : undefined,
+      ...(broken === "grant" ? { reportedState: { fields: ["state"], value: "granted" } } : {}) }, lab,
       invoke: async (bin, args, target, extras) => {
         const result = await observe(bin, args, target, extras); observations.push(result); return result;
       } });

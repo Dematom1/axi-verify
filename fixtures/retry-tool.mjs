@@ -8,7 +8,7 @@ const native = (verb) => execFileSync("argocd", ["fixture", verb], { encoding: "
 const output = (text) => process.stdout.write(text + "\n");
 if (command === "read") {
   output(`state: ${native("get")}`);
-  if (process.env.AXI_RETRY_BROKEN === "output") output(`timestamp: ${process.pid}`);
+  if (process.env.AXI_RETRY_BROKEN === "output") output(`timestamp: "${process.pid}"`);
   if (process.env.AXI_RETRY_BROKEN === "elapsed") output(`timer: "condition met after ${process.pid}s"`);
   if (process.env.AXI_RETRY_BROKEN === "elapsed-state") output(`timer: "condition ${process.pid} after ${process.pid}s"`);
   if (process.env.AXI_RETRY_BROKEN === "read-native") native("set");

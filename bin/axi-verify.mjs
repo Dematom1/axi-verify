@@ -66,6 +66,7 @@ if (args.length === 1 && ["--version", "-v", "-V"].includes(args[0])) {
               passed: result.passed,
               rows: result.rows.length,
               failures: result.failures,
+              unexpected_http: result.unexpectedHttp,
               known_limitations: result.knownLimitations,
               retry_limits: result.retryLimits,
               retry_coverage: result.retryCoverage,

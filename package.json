@@ -13,7 +13,8 @@
     "lib",
     "fixtures",
     "rules",
-    "sgconfig.yml"
+    "sgconfig.yml",
+    ".axi/verify.json"
   ],
   "engines": {
     "node": ">=22.12"
@@ -30,5 +31,8 @@
     "@toon-format/toon": "2.3.1",
     "smol-toml": "1.9.1",
     "yaml": "2.9.1"
+  },
+  "devDependencies": {
+    "terraform-axi": "0.1.3"
   }
 }

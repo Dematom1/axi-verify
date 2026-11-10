@@ -1,0 +1,38 @@
+plan_json: /Users/laszlohoranszky/.treehouse/agent-workspace-b8697d/3/agent-workspace/data/axi-terraform-catalog/fixtures/plan.json
+version: 1.15.8
+status: planned
+summary:
+  add: 30
+  change: 0
+  destroy: 0
+risk:
+  high: 0
+  low: 30
+changes[25]{address,action,type,risk,flags,reason}:
+  terraform_data.item000,create,terraform_data,low,"",""
+  terraform_data.item001,create,terraform_data,low,"",""
+  terraform_data.item002,create,terraform_data,low,"",""
+  terraform_data.item003,create,terraform_data,low,"",""
+  terraform_data.item004,create,terraform_data,low,"",""
+  terraform_data.item005,create,terraform_data,low,"",""
+  terraform_data.item006,create,terraform_data,low,"",""
+  terraform_data.item007,create,terraform_data,low,"",""
+  terraform_data.item008,create,terraform_data,low,"",""
+  terraform_data.item009,create,terraform_data,low,"",""
+  terraform_data.item010,create,terraform_data,low,"",""
+  terraform_data.item011,create,terraform_data,low,"",""
+  terraform_data.item012,create,terraform_data,low,"",""
+  terraform_data.item013,create,terraform_data,low,"",""
+  terraform_data.item014,create,terraform_data,low,"",""
+  terraform_data.item015,create,terraform_data,low,"",""
+  terraform_data.item016,create,terraform_data,low,"",""
+  terraform_data.item017,create,terraform_data,low,"",""
+  terraform_data.item018,create,terraform_data,low,"",""
+  terraform_data.item019,create,terraform_data,low,"",""
+  terraform_data.item020,create,terraform_data,low,"",""
+  terraform_data.item021,create,terraform_data,low,"",""
+  terraform_data.item022,create,terraform_data,low,"",""
+  terraform_data.item023,create,terraform_data,low,"",""
+  terraform_data.item024,create,terraform_data,low,"",""
+low_risk_omitted: 5
+help[1]: "Add `--expect add=N,change=N,destroy=N` to assert the planned counts"

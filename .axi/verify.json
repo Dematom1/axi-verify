@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "package": "axi-verify",
+  "fixture": "axi-verify",
+  "graph": ["lib/commands.mjs"],
+  "commands": [
+    {"route":["packed"],"flags":{"--tarball":"value","--expected-git-head":"value","--evidence-dir":"value","--help":"boolean"},"operands":{"min":0,"max":0},"probe":["packed","--tarball","{plan}"],"defaults":{"--tarball":"pack current source","--expected-git-head":"none","--evidence-dir":".axi-evidence/<timestamp>"},"examples":[["axi-verify","packed"],["axi-verify","packed","--tarball","/absolute/tool.tgz","--evidence-dir","/absolute/evidence"]]},
+    {"route":["static"],"flags":{"--help":"boolean"},"operands":{"min":0,"max":0},"probe":["static"],"defaults":{},"examples":[["axi-verify","static"],["axi-verify","static","--help"]]}
+  ],
+  "cases": {
+    "home": {"argv":[],"markers":["unconfigured"]},
+    "failure": [
+      {"argv":["packed","--tarball","{plan}"],"fault":"missing-file","code":"VERIFICATION_FAILED","next":[["axi-verify","packed","--tarball","<readable-archive>"]]},
+      {"argv":["packed","--tarball","{plan}"],"fault":"unreadable-file","code":"VERIFICATION_FAILED","next":[["axi-verify","packed","--tarball","<readable-archive>"]]}
+    ],
+    "readonly": [[],["--help"]]
+  },
+  "unsupported": [
+    {"check":"list","status":"not-applicable","reason":"The executable command registry exposes verification operations, not backend collections. Reconciliation output is not a resource list."},
+    {"check":"empty","status":"not-applicable","reason":"There is no backend collection or empty-list operation."},
+    {"check":"truncation","status":"not-applicable","reason":"The verifier emits complete verification summaries and evidence paths; it has no capped resource/detail view."},
+    {"check":"ambient","status":"not-applicable","reason":"This development verifier has no agent-session integration or workspace session data. Its registry declares setup/uninstall absent."}
+  ]
+}

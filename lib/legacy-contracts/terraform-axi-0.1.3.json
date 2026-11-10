@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "package": "terraform-axi",
+  "fixture": "terraform-local",
+  "graph": ["dist/src/cli.js"],
+  "commands": [
+    {"route":["plan"],"flags":{"--expect":"value","--plan-json":"value","--binary":"value","--timeout":"value","--full":"boolean","--help":"boolean"},"operands":{"min":0,"max":1},"probe":["plan","--plan-json","{plan}"],"defaults":{"--timeout":1800,"low-risk rows":25,"--full":false},"examples":[["terraform-axi","plan","."],["terraform-axi","plan","--plan-json","plan.json","--full"]]},
+    {"route":["drift"],"flags":{"--binary":"value","--help":"boolean"},"operands":{"min":1,"max":1},"probe":["drift","{module}"],"defaults":{"--binary":"auto"},"examples":[["terraform-axi","drift","."],["terraform-axi","drift",".","--binary","tofu"]]},
+    {"route":["lint"],"flags":{"--binary":"value","--help":"boolean"},"operands":{"min":1,"max":1},"probe":["lint","{module}"],"defaults":{"--binary":"auto"},"examples":[["terraform-axi","lint","infra/prod"],["terraform-axi","lint",".","--binary","tofu"]]},
+    {"route":["doctor"],"flags":{"--offline":"boolean","--explain":"value","--help":"boolean"},"operands":{"min":0,"max":1},"probe":["doctor","{module}","--offline"],"defaults":{"--offline":false},"examples":[["terraform-axi","doctor",".","--offline"],["terraform-axi","doctor","--explain","permission denied"]]},
+    {"route":["state"],"flags":{"--help":"boolean"},"operands":{"min":0,"max":null},"probe":["state","list","{module}"],"defaults":{},"examples":[["terraform-axi","state","list","."],["terraform-axi","state","resource",".","terraform_data.item000"]]},
+    {"route":["state","list"],"flags":{"--full":"boolean","--help":"boolean"},"operands":{"min":1,"max":1},"probe":["state","list","{module}"],"defaults":{"--full":false,"resource limit":100},"examples":[["terraform-axi","state","list","."],["terraform-axi","state","list",".","--full"]]},
+    {"route":["state","resource"],"flags":{"--full":"boolean","--help":"boolean"},"operands":{"min":2,"max":2},"probe":["state","resource","{module}","{address}"],"defaults":{"--full":false,"attribute characters":200},"examples":[["terraform-axi","state","resource",".","terraform_data.item000"],["terraform-axi","state","resource",".","terraform_data.item000","--full"]]},
+    {"route":["setup"],"flags":{"--binary":"value","--wrapper":"value","--module":"value","--remove-module":"value","--help":"boolean"},"operands":{"min":0,"max":0},"probe":["setup","--binary","terraform"],"defaults":{"--binary":"auto"},"examples":[["terraform-axi","setup","--binary","terraform"],["terraform-axi","setup","--module","."]]},
+    {"route":["setup","hooks"],"flags":{"--help":"boolean"},"operands":{"min":0,"max":0},"probe":["setup","hooks"],"defaults":{},"examples":[["terraform-axi","setup","hooks"],["terraform-axi","setup","hooks","--help"]]},
+    {"route":["setup","status"],"flags":{"--help":"boolean"},"operands":{"min":0,"max":0},"probe":["setup","status"],"defaults":{},"examples":[["terraform-axi","setup","status"],["terraform-axi","setup","status","--help"]]},
+    {"route":["setup","uninstall"],"flags":{"--help":"boolean"},"operands":{"min":0,"max":0},"probe":["setup","uninstall"],"defaults":{},"examples":[["terraform-axi","setup","uninstall"],["terraform-axi","setup","uninstall","--help"]]},
+    {"route":["update"],"flags":{"--check":"boolean","--dry-run":"boolean","--help":"boolean"},"operands":{"min":0,"max":0},"probe":["update","--check"],"defaults":{},"examples":[["terraform-axi","update","--check"],["terraform-axi","update","--dry-run"]]}
+  ],
+  "cases": {
+    "home": {"argv":[],"markers":["project-a","project-b"]},
+    "list": [
+      {"argv":["state","list","{module}"],"collection":"/resources","fields":["address","type"],"total":"/total","aggregates":{},"next":[["terraform-axi","state","resource","{module}","<address>"]]},
+      {"argv":["plan","--plan-json","{plan}"],"collection":"/changes","fields":["address","action","type","risk"],"total":"/summary/add","aggregates":{"/summary/add":"add","/summary/change":"change","/summary/destroy":"destroy"},"next":[["terraform-axi","plan","--plan-json","{plan}","--full"]]}
+    ],
+    "empty": {"list":0},
+    "failure": [
+      {"argv":["plan","--plan-json","{plan}"],"fault":"missing-file","code":"COMMAND_FAILED","next":[["terraform-axi","plan","--plan-json","<readable-plan-path>"]]},
+      {"argv":["plan","--plan-json","{plan}"],"fault":"unreadable-file","code":"COMMAND_FAILED","next":[["terraform-axi","plan","--plan-json","<readable-plan-path>"]]}
+    ],
+    "truncation": [
+      {"argv":["state","resource","{module}","{address}"],"kind":"text","value":"/attributes/id","size":"/truncation/id/total","cap":200,"full":["state","resource","{module}","{address}","--full"],"next":[["terraform-axi","state","resource","{module}","{address}","--full"]]},
+      {"argv":["state","list","{module}"],"kind":"rows","value":"/resources","size":"/total","cap":100,"full":["state","list","{module}","--full"],"next":[["terraform-axi","state","list","{module}","--full"]]},
+      {"argv":["plan","--plan-json","{plan}"],"kind":"rows","value":"/changes","size":"/summary/add","cap":25,"full":["plan","--plan-json","{plan}","--full"],"next":[["terraform-axi","plan","--plan-json","{plan}","--full"]]}
+    ],
+    "readonly": [[],["doctor","--offline"],["setup","status"]],
+    "ambient": {"bin":"terraform-axi-ctx","argv":[],"scope":"directory"}
+  },
+  "unsupported": []
+}

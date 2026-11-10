@@ -1,0 +1,6 @@
+module: "--bogus"
+backend: not configured or module not specified
+credentials:
+findings: []
+finding: No static backend block found.
+help[2]: Run `terraform-axi setup` to configure Terraform/OpenTofu,Run `terraform-axi --help` for commands

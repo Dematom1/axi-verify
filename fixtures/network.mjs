@@ -7,6 +7,8 @@ import { appendFileSync, readFileSync } from "node:fs";
 import timers from "node:timers";
 import timersPromises from "node:timers/promises";
 import { createRequire, register, syncBuiltinESMExports } from "node:module";
+if (process.env.AXI_MODULE_LOG)
+  register(new URL("./module-loader.mjs", import.meta.url));
 if (process.env.AXI_KEYRING_STATE)
   register(new URL("./keyring-loader.mjs", import.meta.url));
 if (process.env.AXI_INVENTORY_SDK)

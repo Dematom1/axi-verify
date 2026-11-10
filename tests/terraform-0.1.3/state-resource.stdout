@@ -1,0 +1,9 @@
+address: terraform_data.item000
+type: terraform_data
+provider: terraform.io/builtin/terraform
+attributes:
+  id: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx…
+  input: "[redacted]"
+  output: "[redacted]"
+  triggers_replace: "[redacted]"
+redacted: 315

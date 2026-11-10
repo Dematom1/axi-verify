@@ -51,7 +51,7 @@ if (argv.length === 1 && ["--version", "-v", "-V"].includes(argv[0])) {
       if (options["--capture"]) {
         if (mode !== "lifecycle-capture") writeFileSync(data.session, "session-a");
         out({ status: "recorded" });
-      } else out({ context: mode === "ambient-scope" || process.cwd().startsWith(data.projectA) ? "project-a" : process.cwd().startsWith(data.projectB) ? "project-b" : "none",
+      } else out({ context: mode === "ambient-scope" ? ["project-a", "project-b"] : process.cwd().startsWith(data.projectA) ? "project-a" : process.cwd().startsWith(data.projectB) ? "project-b" : "none",
         session: process.cwd().startsWith(data.projectA) ? (() => { try { return readFileSync(data.session, "utf8"); } catch { return "none"; } })() : "none" });
     } else {
       if (mode === "readonly") writeFileSync(join(process.env.HOME, "implicit-setup"), "bad");

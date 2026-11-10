@@ -86,19 +86,54 @@ test("packed manifest drives every principle check on the minimal fixed fixture"
   });
 });
 
+const reasons = {
+  "structured-output": /stdout must be a structured TOON object/,
+  "minimal-schema": /default list field set differs/,
+  "text-truncation": /truncation must state original size/,
+  "row-truncation": /full output must return every fixture identity/,
+  "list-total": /total must report original collection size/,
+  aggregates: /incorrect aggregate \/aggregate\/open/,
+  "empty-state": /empty state needs explicit zero context/,
+  "operational-error": /expected exit 1, got 0/,
+  usage: /expected exit 2, got 1/,
+  "flag-directory": /expected exit 2, got 0/,
+  "no-prompts": /interactive prompt on required-input failure/,
+  readonly: /EACCES[^\n]*implicit-setup/,
+  "unreadable-input": /expected exit 1, got 0/,
+  "ambient-scope": /ambient context leaks an unrelated directory/,
+  "lifecycle-capture": /SessionEnd must persist independently observable capture/,
+  "content-home": /home must show live fixture marker project-a/,
+  "next-commands": /missing complete next command/,
+  "help-precedence": /expected success:[\s\S]*unknown flag or extra operand --axi-unknown-flag/,
+  "command-help": /help missing default --full=false/,
+  "version-graph": /bare version loaded the command graph/,
+  "full-output": /--full must return the exact original text/,
+  "no-truncation-hint": /untruncated default output must not suggest a full-output escape hatch/,
+};
+assert.deepEqual(Object.keys(reasons), checks, "every negative control needs an expected reason");
+
+function expectControlFailure(summary, check, reason = reasons[check]) {
+  const rows = rowsFor(summary, check), failed = rows.filter((row) => row.status === "failed");
+  assert(rows.length, `packed runner omitted ${check}`);
+  assert(failed.length, `${check} accepted its broken fixture`);
+  assert(failed.some((row) => reason.test(row.error)), `${check}: unrelated failure: ${JSON.stringify(failed)}`);
+}
+
+test("negative controls cannot get credit for an unrelated prerequisite failure", () => {
+  assert.throws(() => expectControlFailure({ rows: [{ id: "principle-no-prompts-static", status: "failed", error: "spawn python3 ENOENT" }] }, "no-prompts"), /unrelated failure/);
+});
+
 test("content-first home must change when the live fixture changes", async () => {
   const summary = await runFixture("stale-home");
-  assert(rowsFor(summary, "content-home").some((row) => row.status === "failed"), "accepted an unchanged static home");
+  expectControlFailure(summary, "content-home", /home must change with live fixture state/);
 });
 
 test("help examples do not substitute for documented defaults", async () => {
   const summary = await runFixture("help-defaults");
-  assert(rowsFor(summary, "command-help").some((row) => row.status === "failed"), "example value was mistaken for a documented default");
+  expectControlFailure(summary, "command-help", /help missing default --limit=2/);
 });
 
 for (const check of checks) test(`packed negative control: ${check}`, async () => {
   const summary = await runFixture(check);
-  const rows = rowsFor(summary, check);
-  assert(rows.length, `packed runner omitted ${check}`);
-  assert(rows.some((row) => row.status === "failed"), `${check} accepted its broken fixture`);
+  expectControlFailure(summary, check);
 });

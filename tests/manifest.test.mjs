@@ -3,7 +3,7 @@ import * as fs from "node:fs/promises";
 import { join } from "node:path";
 import { test } from "node:test";
 import { commandWords, nextCommands } from "../lib/behaviours.mjs";
-import { readContract, validateContract } from "../lib/contract.mjs";
+import { caseNames, readContract, validateContract } from "../lib/contract.mjs";
 import { cleanup, scratch } from "../lib/lab.mjs";
 const own = JSON.parse(await fs.readFile(new URL("../.axi/verify.json", import.meta.url), "utf8"));
 const copy = () => structuredClone(own);
@@ -20,6 +20,23 @@ test("manifest requires explicit per-route data and rejects malformed declaratio
     (c) => { c.cases.failure.pop(); },
     (c) => { c.unsupported[0].reason = ""; },
   ]) { const value = copy(); mutate(value); assert.throws(() => validateContract(value, "axi-verify")); }
+});
+
+test("present cases reject falsy and empty data rather than bypassing validation", () => {
+  for (const name of caseNames) for (const data of [null, false, 0, "", undefined, [], {}]) {
+    const value = copy(); value.cases[name] = data;
+    assert.throws(() => validateContract(value, "axi-verify"), undefined, `${name} must reject ${JSON.stringify(data)}`);
+  }
+});
+
+test("present optional case structures cannot use falsy values to disable checks", () => {
+  for (const field of ["expanded", "aggregates", "empty argv"]) for (const data of [null, false, 0, "", undefined]) {
+    const value = copy();
+    value.cases.list = [{ argv: ["static"], collection: "/records", fields: ["id"], total: "/total", next: [["axi-verify", "static"]] }];
+    if (field === "empty argv") value.cases.empty = { list: 0, argv: data };
+    else value.cases.list[0][field] = data;
+    assert.throws(() => validateContract(value, "axi-verify"), undefined, `${field} must reject ${JSON.stringify(data)}`);
+  }
 });
 
 test("a different package cannot borrow verifier-only inapplicable capabilities", () => {

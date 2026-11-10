@@ -44,7 +44,7 @@ The normal-command checks exercise each profile's listed commands before and aft
 
 ## Behaviour contracts
 
-`packed` also reads `package/.axi/verify.json` from the installed archive. Commit `.axi/verify.json` at each consumer repository's root and include it in that package's `files` list. The working tree cannot supply a replacement for a different archive. Unknown schema fields, invalid fixture references, escaping paths, and missing command data fail closed.
+`packed` also reads `package/.axi/verify.json` from the installed archive. Commit `.axi/verify.json` at each consumer repository's root and include it in that package's `files` list. The working tree cannot supply a replacement for a different archive. Unknown schema fields, invalid fixture references, escaping paths, and missing command data fail closed. A present case must contain valid data: `null`, `false`, and empty containers cannot disable a check.
 
 `lib/profiles.mjs` retains the existing safety, setup, and retry adapters. Its `contract` entries explicitly declare legacy-manifest availability. Only terraform-axi **0.1.3** has a pinned legacy manifest, at [`lib/legacy-contracts/terraform-axi-0.1.3.json`](lib/legacy-contracts/terraform-axi-0.1.3.json). Other versions and tools without a packed manifest fail with `unconfigured contract`; they are not silently skipped. The verifier ships its own [`.axi/verify.json`](.axi/verify.json).
 
@@ -176,6 +176,14 @@ npm run proof:published -- /absolute/catalog-proof /absolute/unpublished-k8s.tgz
 ```
 
 `npm test` includes an installed minimal packed tool that passes the new behaviour checks, deliberate broken controls for each check, strict-manifest controls, and the exact SHA-256-verified terraform-axi 0.1.3 tarball with retained review outputs. The six reviewed failures are asserted against real processes from that artifact, never against prerequisites or only recorded text. Its pinned dev dependency supplies the published runtime dependencies without network access during those tests. Fixture Terraform responses contain only local built-in resources, 105 state entries, a 30-change saved plan, and long attributes. No real Terraform operation or cloud account is used. Test evidence first demonstrated the old runner omitting these checks before the checks were implemented.
+
+Recorded review stdout and argv use stable `/fixtures` paths, `<user>`, and `<host>` placeholders. `provenance.json` hashes the normalized stdout and retains `sourceSha256` for its original capture. The published tarball remains byte-identical. Regeneration uses the same normalization before writing or hashing:
+
+```sh
+node --input-type=module -e 'import { recordTerraformEvidence } from "./scripts/record-terraform-evidence.mjs"; await recordTerraformEvidence("/absolute/review-directory", "/absolute/axi-verify/tests/terraform-0.1.3")'
+```
+
+Every broken control asserts its expected principle and diagnostic, not merely a failed status. A missing interpreter, unexpected I/O, or another prerequisite failure cannot count as detecting the intended defect.
 
 The suite also includes the normal-command hook-installation negative control, real permission denials, a deliberately ineffective lock, root rejection, same-content and absolute-shell side-effect writes, noisy prepack output, missing and incorrect `gitHead`, CLI validation, fixture-first PATH behavior, exact backend argument vectors, network refusal, unsupported-command side effects, plugin package directories, initialization cleanup, historical artifact identity, evidence destinations, and all four ast-grep families. Rule snapshots record exact matches. Historical fixtures include full source files, their repository revisions, and SHA-256 hashes in `tests/history/provenance.json`.
 

@@ -1,10 +1,13 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
+import { hostname, userInfo } from "node:os";
+import { gunzipSync } from "node:zlib";
 import * as fs from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
-import { decode } from "@toon-format/toon";
+import { decode, encode } from "@toon-format/toon";
+import { recordTerraformEvidence } from "../scripts/record-terraform-evidence.mjs";
 import { behaviourRows, nextCommands } from "../lib/behaviours.mjs";
 import { cleanup, observe, processResult, sandbox, scratch } from "../lib/lab.mjs";
 import { noUnexpectedIO } from "../lib/observations.mjs";
@@ -12,9 +15,49 @@ import { profiles } from "../lib/profiles.mjs";
 const evidence = new URL("./terraform-0.1.3/", import.meta.url);
 const metadata = JSON.parse(await fs.readFile(new URL("provenance.json", evidence), "utf8"));
 
-test("retained terraform-axi tarball and review outputs retain exact provenance", async () => {
+test("published tarball and normalized review outputs match their recorded provenance", async () => {
   for (const item of metadata.files) assert.equal(createHash("sha256").update(await fs.readFile(new URL(item.file, evidence))).digest("hex"), item.sha256, item.file);
   assert.equal(metadata.files.find((f) => f.file.endsWith(".tgz")).sha256, "6b123e987640bb539143b300dcde120e9a5bff1aa1c92ae47c0cedbefdd78ee9");
+});
+
+test("committed evidence contains no personal home paths, username, or machine name", async () => {
+  const identities = [userInfo().username, hostname()].map((name) => new RegExp(`\\b${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i"));
+  for (const file of [...metadata.files.map((item) => item.file), "provenance.json"]) {
+    const bytes = await fs.readFile(new URL(file, evidence));
+    const text = (file.endsWith(".tgz") ? gunzipSync(bytes) : bytes).toString("utf8");
+    assert(!/\/(?:Users|home)\//.test(text), `${file} contains a personal home path`);
+    for (const identity of file.endsWith(".tgz") ? identities.slice(1) : identities) assert(!identity.test(text), `${file} contains a local identity`);
+  }
+});
+
+test("recording normalizes identities before hashing while preserving the published artifact", async () => {
+  const root = await scratch();
+  try {
+    const review = join(root, "review"), destination = join(root, "recorded"), home = join("/", "Users", "fixture-person");
+    await fs.mkdir(join(review, "runs"), { recursive: true });
+    const raw = encode({ path: `${home}/workspace/fixtures/state`, user: "fixture-person", machine: "fixture-machine.local", total: 105 }) + "\n";
+    const results = [];
+    for (const item of metadata.files) {
+      if (item.file.endsWith(".tgz")) await fs.copyFile(new URL(item.file, evidence), join(review, item.file));
+      else {
+        await fs.writeFile(join(review, "runs", item.file), raw);
+        results.push({ label: item.file.slice(0, -7), args: ["state", "list", `${home}/workspace/fixtures/state`], exit: 1, stdout: raw });
+      }
+    }
+    await fs.writeFile(join(review, "results.json"), JSON.stringify(results));
+    const captured = await recordTerraformEvidence(review, destination, { home, username: "fixture-person", hostname: "fixture-machine.local" });
+    for (const item of captured.files) {
+      const bytes = await fs.readFile(join(destination, item.file));
+      assert.equal(createHash("sha256").update(bytes).digest("hex"), item.sha256);
+      if (item.file.endsWith(".tgz")) assert.deepEqual(bytes, await fs.readFile(new URL(item.file, evidence)));
+      else {
+        assert.deepEqual(decode(bytes.toString()), { path: "/fixtures/state", user: "<user>", machine: "<host>", total: 105 });
+        assert.deepEqual(item.argv, ["state", "list", "/fixtures/state"]);
+        assert.equal(item.exit, 1);
+        assert.equal(item.sourceSha256, createHash("sha256").update(raw).digest("hex"));
+      }
+    }
+  } finally { await cleanup(root); }
 });
 
 const recorded = async (label) => decode(await fs.readFile(new URL(label + ".stdout", evidence), "utf8"));

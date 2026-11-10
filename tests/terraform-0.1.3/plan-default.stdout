@@ -1,4 +1,4 @@
-plan_json: /Users/laszlohoranszky/.treehouse/agent-workspace-b8697d/3/agent-workspace/data/axi-terraform-catalog/fixtures/plan.json
+plan_json: /fixtures/plan.json
 version: 1.15.8
 status: planned
 summary:

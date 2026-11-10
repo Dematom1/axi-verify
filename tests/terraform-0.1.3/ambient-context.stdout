@@ -1,4 +1,4 @@
 terraform_axi:
   binary: terraform
-  modules[1]: /Users/laszlohoranszky/.treehouse/agent-workspace-b8697d/3/agent-workspace/data/axi-terraform-catalog/fixtures/state
+  modules[1]: /fixtures/state
   writes: never

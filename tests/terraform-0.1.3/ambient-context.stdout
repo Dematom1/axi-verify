@@ -1,0 +1,4 @@
+terraform_axi:
+  binary: terraform
+  modules[1]: /fixtures/state
+  writes: never

@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { parse } from "yaml";
 import { kubernetesReply } from "./kubernetes.mjs";
 import { updateFixture } from "./update.mjs";
+import { behaviourReply } from "./behaviour-external.mjs";
 // Exact native fixture vectors only; observation of an operation is independent
 // of the wrapper's reported status. Unknown calls fall through to fail closed.
 function retryExternal(bin, args) {
@@ -37,6 +38,13 @@ const bin = basename(process.argv[1]);
 const args = process.argv.slice(2),
   text = args.join(" ");
 retryExternal(bin, args);
+const behaviour = behaviourReply(bin, args);
+if (behaviour) {
+  appendFileSync(process.env.AXI_FIXTURE_LOG, JSON.stringify({ bin, args, allowed: true, nativeExit: behaviour.exit }) + "\n");
+  if (behaviour.stderr) process.stderr.write(behaviour.stderr);
+  process.stdout.write(typeof behaviour.stdout === "string" ? behaviour.stdout : JSON.stringify(behaviour.stdout));
+  process.exit(behaviour.exit);
+}
 updateFixture(bin, args);
 const exact = (expected) => JSON.stringify(args) === JSON.stringify(expected);
 let value;

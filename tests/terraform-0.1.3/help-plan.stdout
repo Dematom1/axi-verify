@@ -1,0 +1,6 @@
+usage: "terraform-axi plan <module> [--expect add=N,change=N,destroy=N] [--binary terraform|tofu] [--timeout seconds] [--full] | terraform-axi plan --plan-json <file> [--expect ...] [--full]"
+runs: plan -json -input=false -lock=false -detailed-exitcode
+diagnostics: "metadata only; provider text and subprocess excerpts withheld; --full lists rows, not diagnostic text"
+wrapper_stdout: plain-text progress counted as skipped_wrapper_lines; JSON-looking lines must be complete JSON events; prefer progress on stderr
+never: "apply, destroy, -out plan files, state writes"
+help[1]: "Run `terraform-axi plan <module> --expect add=0,change=0,destroy=0` to assert a no-op plan"

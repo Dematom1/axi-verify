@@ -40,8 +40,10 @@ test('managed state ignores unrelated plugin package directories', async () => {
 test('npm initialization failure closes the fixture server and cleans scratch', async () => {
   const root = await scratch();
   try {
+    // Keep archive readability valid so the initialization fault is reached.
+    await fs.writeFile(join(root, 'fixture.tgz'), 'readable archive fixture');
     // Fault-inject one initialization boundary; permission behavior has separate real-denial tests.
-    const code = `import fs from 'node:fs/promises'; const mkdir=fs.mkdir; let scratch; fs.mkdir=async(p,...rest)=>{if(String(p).endsWith('/npm-home')){scratch=String(p).slice(0,-9);throw new Error('fixture npm initialization denied');}return mkdir(p,...rest)}; (await import('node:module')).syncBuiltinESMExports(); const {verifyPacked}=await import(${JSON.stringify(new URL('../lib/packed.mjs', import.meta.url).href)});try{await verifyPacked({tarball:${JSON.stringify(join(root,'missing.tgz'))},evidenceDir:${JSON.stringify(join(root,'evidence'))}})}catch(e){console.log(e.message);try{await fs.access(scratch);process.exitCode=3}catch{console.log('scratch removed')}}`;
+    const code = `import fs from 'node:fs/promises'; const mkdir=fs.mkdir; let scratch; fs.mkdir=async(p,...rest)=>{if(String(p).endsWith('/npm-home')){scratch=String(p).slice(0,-9);throw new Error('fixture npm initialization denied');}return mkdir(p,...rest)}; (await import('node:module')).syncBuiltinESMExports(); const {verifyPacked}=await import(${JSON.stringify(new URL('../lib/packed.mjs', import.meta.url).href)});try{await verifyPacked({tarball:${JSON.stringify(join(root,'fixture.tgz'))},evidenceDir:${JSON.stringify(join(root,'evidence'))}})}catch(e){console.log(e.message);try{await fs.access(scratch);process.exitCode=3}catch{console.log('scratch removed')}}`;
     const result = await processResult(process.execPath, ['--input-type=module', '-e', code], { cwd: root, timeout: 5_000 });
     assert.equal(result.failure, undefined, 'fixture server kept the process alive');
     assert.equal(result.exit, 0, result.stderr);

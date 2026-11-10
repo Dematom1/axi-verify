@@ -1,0 +1,146 @@
+{
+  "package": "terraform-axi",
+  "version": "0.1.3",
+  "gitHead": "7098f904ba9e88f4c540a09cc05a839a03445cca",
+  "source": "npm pack terraform-axi@0.1.3 and the 2026-11-09 published-artifact admission review final runs",
+  "normalization": "Recorded TOON and argv have personal home prefixes, local username, and machine name replaced with stable placeholders before hashing. sourceSha256 identifies original captured stdout; the published tarball is unchanged.",
+  "files": [
+    {
+      "file": "ambient-context.stdout",
+      "sha256": "1fc184e91e78d31e13b446701ca9b8377124baeb85e3b9457562092971c77e53",
+      "sourceSha256": "dabe540f90a1261815ebd1afa0e55493578e0613db000315d31f9bea2a3408fa",
+      "argv": [
+        "terraform-axi-ctx"
+      ],
+      "exit": 0
+    },
+    {
+      "file": "doctor-bad-flag-existing-dir.stdout",
+      "sha256": "3f52233fc9345374535e0c23a1f8aaf4dc4dd62aa77fc857f0786f177f49b7bd",
+      "sourceSha256": "3f52233fc9345374535e0c23a1f8aaf4dc4dd62aa77fc857f0786f177f49b7bd",
+      "argv": [
+        "doctor",
+        "--bogus",
+        "--offline"
+      ],
+      "exit": 0
+    },
+    {
+      "file": "doctor-explain-missing.stdout",
+      "sha256": "eaa41832ee85fc8116f4736c89e713b6c456451b545fdc75093ab4205ad16528",
+      "sourceSha256": "eaa41832ee85fc8116f4736c89e713b6c456451b545fdc75093ab4205ad16528",
+      "argv": [
+        "doctor",
+        "--explain"
+      ],
+      "exit": 1
+    },
+    {
+      "file": "doctor-extra-args.stdout",
+      "sha256": "5ad8e4074f0f25ed46b6c8a4359d10410ab48c430afc2b48ccc71ab370f855b7",
+      "sourceSha256": "5ad8e4074f0f25ed46b6c8a4359d10410ab48c430afc2b48ccc71ab370f855b7",
+      "argv": [
+        "doctor",
+        "one",
+        "two",
+        "--offline"
+      ],
+      "exit": 1
+    },
+    {
+      "file": "help-plan.stdout",
+      "sha256": "436e5688e99170cba7c72e6a1b3ac77800515d488f522acca16476e37a7fecc7",
+      "sourceSha256": "436e5688e99170cba7c72e6a1b3ac77800515d488f522acca16476e37a7fecc7",
+      "argv": [
+        "plan",
+        "--help"
+      ],
+      "exit": 0
+    },
+    {
+      "file": "plan-bad-flag.stdout",
+      "sha256": "33fc0282e7ca2801783cf2355616b3758a061b984414caab145fdfb3346ae922",
+      "sourceSha256": "33fc0282e7ca2801783cf2355616b3758a061b984414caab145fdfb3346ae922",
+      "argv": [
+        "plan",
+        "--plan-json",
+        "/fixtures/plan.json",
+        "--bogus"
+      ],
+      "exit": 2
+    },
+    {
+      "file": "plan-default.stdout",
+      "sha256": "5b2b04f185d6d0809b4587631ed5bfa29851a98292183b641655566802df16ff",
+      "sourceSha256": "329a6ac4d46d38d2c4ef7b6859aff46445219d76b8f710a70e9d98c4b29c4e61",
+      "argv": [
+        "plan",
+        "--plan-json",
+        "/fixtures/plan.json"
+      ],
+      "exit": 0
+    },
+    {
+      "file": "plan-help-with-input.stdout",
+      "sha256": "1646156bd144f347f6fafe61ffc042287e1504f4dff794cd1a9a6e07d60cb5a0",
+      "sourceSha256": "1646156bd144f347f6fafe61ffc042287e1504f4dff794cd1a9a6e07d60cb5a0",
+      "argv": [
+        "plan",
+        "--plan-json",
+        "/fixtures/plan.json",
+        "--help"
+      ],
+      "exit": 2
+    },
+    {
+      "file": "plan-unreadable.stdout",
+      "sha256": "1003ff4473f51f2aa64421623471f6ac0a778c7c3e481a92d8999a80f23cddf1",
+      "sourceSha256": "604b5e123f7a39d78a94869e4304a138f7e85678fe3f3fb3e1f27b225fca61e2",
+      "argv": [
+        "plan",
+        "--plan-json",
+        "/fixtures/unreadable-plan.json"
+      ],
+      "exit": 1
+    },
+    {
+      "file": "state-list-full.stdout",
+      "sha256": "6db957ad4b04e1f50b6f8902fc901c03ff850d6e5f8b246deb1a59a21e917a7c",
+      "sourceSha256": "6db957ad4b04e1f50b6f8902fc901c03ff850d6e5f8b246deb1a59a21e917a7c",
+      "argv": [
+        "state",
+        "list",
+        "/fixtures/state",
+        "--full"
+      ],
+      "exit": 0
+    },
+    {
+      "file": "state-list.stdout",
+      "sha256": "6db957ad4b04e1f50b6f8902fc901c03ff850d6e5f8b246deb1a59a21e917a7c",
+      "sourceSha256": "6db957ad4b04e1f50b6f8902fc901c03ff850d6e5f8b246deb1a59a21e917a7c",
+      "argv": [
+        "state",
+        "list",
+        "/fixtures/state"
+      ],
+      "exit": 0
+    },
+    {
+      "file": "state-resource.stdout",
+      "sha256": "04f8045a47399f2da98dece7853efcb3804c883934f0aca19a461566882c5358",
+      "sourceSha256": "04f8045a47399f2da98dece7853efcb3804c883934f0aca19a461566882c5358",
+      "argv": [
+        "state",
+        "resource",
+        "/fixtures/state",
+        "terraform_data.item000"
+      ],
+      "exit": 0
+    },
+    {
+      "file": "terraform-axi-0.1.3.tgz",
+      "sha256": "6b123e987640bb539143b300dcde120e9a5bff1aa1c92ae47c0cedbefdd78ee9"
+    }
+  ]
+}

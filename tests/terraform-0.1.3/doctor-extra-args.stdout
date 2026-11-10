@@ -1,0 +1,3 @@
+code: VALIDATION_ERROR
+error: "VALIDATION_ERROR: doctor accepts at most one module"
+help[3]: Check file permissions or repair malformed settings before retrying,Run `terraform-axi setup` to configure Terraform/OpenTofu,Run `terraform-axi --help` for commands

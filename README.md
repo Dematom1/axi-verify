@@ -191,4 +191,16 @@ The suite also includes the normal-command hook-installation negative control, r
 
 Static rules match bounded syntax, not full control flow or interprocedural behavior. The swallowed-error rule recognizes a direct positive `errors.length`/`failures.length` guard in the collecting block and inline uninstall callbacks that record or throw. Conditional nested propagation and callback references require review; these rules are regression tripwires, not a general proof of error handling. Identifier-backed hook matching covers same-block uses and top-level bindings used in blocks without a same-name local declaration or function parameter. It does not perform full TypeScript binding resolution.
 
-The package CI runs tests, historical static and runtime proofs, and an installed-archive smoke check on Linux and macOS. The Linux lane also invokes the actual root precondition. Consumer wiring, release automation, required-check administration, and recurring maintenance are out of scope.
+The package CI runs tests, historical static and runtime proofs, and an installed-archive smoke check on Linux and macOS. The Linux lane also invokes the actual root precondition. Consumer wiring, required-check administration, and recurring maintenance are out of scope.
+
+## Release
+
+Merging the release-please PR tags the release and runs a publish job that stages the packed tarball with `npm stage publish --provenance`. A maintainer approves the stage with `npm --auth-type=web stage approve <id>`. Weekly merge runs through `weekly-release.yml`.
+
+Before the first publish, operations must configure:
+
+- Repository secrets `RELEASE_APP_ID` and `RELEASE_APP_PRIVATE_KEY`, for the release GitHub App (Contents and Pull requests read/write, installed on this repository).
+- The `npm-publish` GitHub environment, which the publish job declares.
+- An npm trusted publisher for `axi-verify`: owner `Dematom1`, repository `axi-verify`, workflow `release-please.yml`, environment `npm-publish`.
+
+The first 0.2.0 publish is manual. `npm trust` needs the package to exist, so stage the first release with a local session or a stage-only token (`npm stage publish`), approve it with `npm --auth-type=web stage approve <id>`, then configure the trusted publisher. Later releases go through the workflow.

@@ -1,0 +1,6 @@
+usage: "terraform-axi <command> [args]"
+commands[7]: home,plan,drift,lint,doctor,state,setup
+help: "usage: terraform-axi <command> [args]\ncommands[7]:\n  (none)=home, plan, drift, lint, doctor, state, setup\nsummary[7]:\n  (none): configured modules, wrapper and available Terraform/OpenTofu versions\n  plan: read-only plan risk summary; --expect add=N,change=N,destroy=N asserts counts\n  drift: resources changed outside Terraform/OpenTofu (refresh-only plan)\n  lint: read-only formatting, initialized validation, and optional tflint findings\n  doctor: backend, reachability and credential diagnostics (no init or state access)\n  state: list resources or inspect one with secrets redacted\n  setup: configure binary, wrapper and modules; hooks, status and uninstall\nsetup[3]:\n  hooks: install user-level SessionStart and SessionEnd integrations for supported agents\n  status: show setup config and managed hook status\n  uninstall: remove only terraform-axi-managed user-level hooks\n"
+"built-in":
+  update: Upgrade `terraform-axi.js` to the latest published version
+  "update --check": Report current vs latest without installing

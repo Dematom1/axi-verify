@@ -10,7 +10,8 @@ export function kubernetesReply(args) {
   if (exact(["get", "node", "healthy", "-o", "json"])) return node;
   if (exact(["get", "pod", "healthy", "-n", "default", "-o", "json"])) return pod;
   if (exact(["get", "deployment.apps", "healthy", "-n", "default", "-o", "json"])) return deployment;
-  if (exact(["logs", "healthy", "-n", "default", "-c", "app", "--tail=100", "--limit-bytes=1048576"])) return "fixture log\n";
+  // k8s-axi asks for one line more than its 100-line cap to detect truncation.
+  for (const tail of [100, 101]) if (exact(["logs", "healthy", "-n", "default", "-c", "app", `--tail=${tail}`, "--limit-bytes=1048576"])) return "fixture log\n";
   if (["jobs.batch", "pods", "deployments.apps", "persistentvolumeclaims", "services", "endpointslices.discovery.k8s.io"].some((noun) => exact(["get", noun, "-A", "-o", "json"]))) return empty;
   for (const scope of [["-A"], ["-n", "default"]]) {
     for (const selector of ["type=Warning", ...["Pod", "Node", "Deployment"].map((kind) => `involvedObject.kind=${kind},involvedObject.name=healthy`)])

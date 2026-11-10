@@ -1,0 +1,4 @@
+usage: "terraform-axi setup [--binary terraform|tofu|auto] [--wrapper command] [--module name] [--remove-module name] | setup hooks|status|uninstall"
+flags[5]: "--binary terraform|tofu|auto","--wrapper <command>: requires {module} placeholder","--module <path>: repeatable","--remove-module <path>: repeatable","--help: show this reference without running the operation"
+defaults: binary auto; no wrapper or modules on first run; hooks require explicit setup hooks
+examples[3]: terraform-axi setup --binary tofu --module infra/prod,terraform-axi setup hooks,terraform-axi setup status

@@ -80,7 +80,7 @@ The JSON manifest is data only. It cannot supply scripts, new fixture executable
 | `cases.failure` | Entries with `argv`, `fault` (`missing-file`, `unreadable-file`, or `backend-denied`), expected structured `code`, and `next` templates. Expected exit is 1. |
 | `cases.truncation` | Entries with `argv`, `kind` (`text` or `rows`), output `value` and original `size` pointers, `cap`, complete `full` argv, and `next` templates. The adapter supplies data above and below the cap. |
 | `cases.readonly` | Ordinary argv arrays to run with HOME/config locked after fixture setup. Existing denial lanes separately test explicit denied mutations. |
-| `cases.ambient` | Installed `bin`, `argv`, and scope `directory` or `project-root`. The adapter supplies separate A/B data and a synthetic capture input. |
+| `cases.ambient` | Installed `bin`, `argv`, and scope `directory` or `project-root`; optional `capture` argv (run on that `bin`) when the tool captures sessions outside `context end`. The adapter supplies separate A/B data and a synthetic capture input. |
 | `unsupported` | Explicit `check`, `status`, and `reason`. `unconfigured` fails coverage. `not-applicable` is reported separately and accepted only for verifier-known absent capabilities, not missing product features. All required case categories must exist or have an explicit declaration. |
 
 The file-consuming Terraform, verifier, and minimal-test adapters require both missing-file and unreadable-file cases. An operational failure alone cannot silently stand in for an unreadable-input check.

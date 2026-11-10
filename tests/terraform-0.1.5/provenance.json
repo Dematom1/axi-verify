@@ -1,0 +1,9 @@
+{
+  "package": "terraform-axi",
+  "version": "0.1.5",
+  "source": "npm pack terraform-axi@0.1.5, npm install --omit=dev --ignore-scripts, run with an empty HOME; stdout unmodified",
+  "files": [
+    { "file": "top-help.stdout", "argv": ["--help"], "exit": 0 },
+    { "file": "setup-help.stdout", "argv": ["setup", "--help"], "exit": 0 }
+  ]
+}

@@ -11,10 +11,6 @@ on:
         required: true
         type: string
 
-concurrency:
-  group: release-please
-  cancel-in-progress: false
-
 permissions:
   contents: read
 
@@ -142,6 +138,10 @@ jobs:
     if: ${{ !cancelled() && needs.build.result == 'success' }}
     runs-on: ubuntu-latest
     environment: npm-publish
+    # Only publishing is serialized: a pending approval must never be replaced by a later push.
+    concurrency:
+      group: npm-publish
+      cancel-in-progress: false
     permissions:
       id-token: write # npm trusted publishing and provenance
     steps:
@@ -193,7 +193,7 @@ jobs:
             exit 0
           fi
           if ! npm stage publish "./$TARBALL" --access public --provenance --ignore-scripts; then
-            echo "::error::Staging $SPEC failed. If an earlier run already staged it, approve it with 'npm --auth-type=web stage approve <id>' or discard it on npmjs.com instead of re-running."
+            echo "::error::Staging $SPEC failed. If an earlier run already staged it, approve it with 'npm --auth-type=web stage approve <id>' or discard it on npmjs.com instead of re-running. If the package does not exist yet, stage and approve its first release manually, then configure its npm trusted publisher (see README, Release)."
             exit 1
           fi
           version="${SPEC##*@}"

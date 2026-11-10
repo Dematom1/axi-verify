@@ -67,3 +67,10 @@ test("publish fails without staging when npm view fails for a reason other than 
   assert.notEqual(run.status, 0);
   assert.doesNotMatch(run.calls, /stage publish/);
 });
+
+test("a pending publish is never cancelled by a later push, while release-please keeps running", () => {
+  assert.equal(workflow.concurrency, undefined, "a workflow-level group would let a later push replace a pending release run");
+  assert.deepEqual(workflow.jobs.publish.concurrency, { group: "npm-publish", "cancel-in-progress": false });
+  assert.equal(workflow.jobs["release-please"].concurrency, undefined);
+  assert.equal(workflow.jobs.build.concurrency, undefined);
+});

@@ -174,7 +174,21 @@ jobs:
           TARBALL: ${{ needs.build.outputs.tarball }}
         run: |
           set -eu
-          if [ -n "$(npm view "$SPEC" version 2>/dev/null)" ]; then
+          # Only npm's E404 means "not yet published"; any other lookup failure must stop the job.
+          set +e
+          err_file="$(mktemp)"
+          published="$(npm view "$SPEC" version 2>"$err_file")"
+          view_status=$?
+          set -e
+          if [ "$view_status" -ne 0 ]; then
+            if ! grep -q 'E404' "$err_file"; then
+              cat "$err_file" >&2
+              echo "::error::npm view $SPEC failed for a reason other than not-found; refusing to stage."
+              exit 1
+            fi
+            published=""
+          fi
+          if [ -n "$published" ]; then
             echo "$SPEC is already published; nothing to do."
             exit 0
           fi

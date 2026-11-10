@@ -35,7 +35,7 @@ Commands return TOON on stdout. Exit codes are 0 for a passing suite or help, 1 
 - `argocd-axi`: applications, local context allowlist, and session hooks.
 - `argo-workflows-axi`: workflows and session hooks. `setup status` is unsupported.
 - `datadog-axi`: monitor search and user or project session hooks.
-- `terraform-axi`: resource addresses and types, local binary configuration, and session integrations. The pinned 0.1.3 behaviour manifest exposes its missing SessionEnd capture and other published defects; they are not exemptions.
+- `terraform-axi`: resource addresses and types, local binary configuration, and session integrations. The pinned 0.1.3 artifact and manifest preserve regression evidence for published defects. Separate 0.1.5 help fixtures cover nested-route verifier regressions; they are not a newer packed contract.
 - `search-console-axi`: local credential registration and the two-field `setup check` sites list. The current home command returns site counts and analytics, not that list. `setup hooks` must remain unsupported.
 - `k8s-axi`: pod diagnostics and session hooks. Its local pack does not establish npm publication.
 - `axi-verify`: static checks, help and version. Its executable command registry declares no setup or uninstall; packed verification is classified as repeatable reconciliation, not recursively invoked.
@@ -175,7 +175,7 @@ npm run proof:runtime -- /absolute/runtime-proof
 npm run proof:published -- /absolute/catalog-proof /absolute/unpublished-k8s.tgz
 ```
 
-`npm test` includes an installed minimal packed tool that passes the new behaviour checks, deliberate broken controls for each check, strict-manifest controls, and the exact SHA-256-verified terraform-axi 0.1.3 tarball with retained review outputs. The six reviewed failures are asserted against real processes from that artifact, never against prerequisites or only recorded text. Its pinned dev dependency supplies the published runtime dependencies without network access during those tests. Fixture Terraform responses contain only local built-in resources, 105 state entries, a 30-change saved plan, and long attributes. No real Terraform operation or cloud account is used. Test evidence first demonstrated the old runner omitting these checks before the checks were implemented.
+`npm test` includes an installed minimal packed tool that passes the new behaviour checks, deliberate broken controls for each check, strict-manifest controls, and the exact SHA-256-verified terraform-axi 0.1.3 tarball with retained review outputs. The six reviewed failures are asserted against real processes from that artifact, never against prerequisites or only recorded text. Separate pinned terraform-axi 0.1.5 help output in `tests/terraform-0.1.5` reproduces nested-route discovery cases; it is not the packed contract artifact. The pinned dev dependency supplies the published runtime dependencies without network access during those tests. Fixture Terraform responses contain only local built-in resources, 105 state entries, a 30-change saved plan, and long attributes. No real Terraform operation or cloud account is used. Test evidence first demonstrated the old runner omitting these checks before the checks were implemented.
 
 Recorded review stdout and argv use stable `/fixtures` paths, `<user>`, and `<host>` placeholders. `provenance.json` hashes the normalized stdout and retains `sourceSha256` for its original capture. The published tarball remains byte-identical. Regeneration uses the same normalization before writing or hashing:
 

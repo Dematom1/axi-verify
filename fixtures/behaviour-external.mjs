@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { argocdApps, argoWorkflows } from "./adapter-replies.mjs";
 
 export function behaviourReply(bin, args) {
   if (!process.env.AXI_BEHAVIOUR_DATA) return;
@@ -18,5 +19,7 @@ export function behaviourReply(bin, args) {
       status: { phase: i ? "Pending" : "Running", message: data.text, conditions: [{ type: "Ready", status: i ? "False" : "True" }], containerStatuses: [{ name: "app", ready: !i, restartCount: i, state: i ? { waiting: { reason: "CrashLoopBackOff" } } : { running: {} } }] },
     })),
   };
+  if (data.adapter === "argo-workflows" && bin === "argo" && exact(["list", "--output=json", "--loglevel=error"])) stdout = argoWorkflows(data);
+  if (data.adapter === "argocd" && bin === "argocd" && exact(["app", "list", "-o", "json"])) stdout = argocdApps(data);
   if (stdout !== undefined) return data.mode === "backend-denied" ? { stdout: "", stderr: "synthetic permission denial", exit: 1 } : { stdout, exit: 0 };
 }

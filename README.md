@@ -67,7 +67,7 @@ This is bounded behaviour coverage, not certification of every clause of the AXI
 
 ### Manifest fields
 
-The JSON manifest is data only. It cannot supply scripts, new fixture executables, credentials, or network exceptions. Current fixture adapters are `terraform-local`, `kubernetes`, and `axi-verify`; `contract-fixture` is the verifier's minimal packed test tool. Adapter names belong to their package family. Other family profiles explicitly remain unconfigured for new behaviour cases until their command data and adapter are supplied.
+The JSON manifest is data only. It cannot supply scripts, new fixture executables, credentials, or network exceptions. Current fixture adapters are `terraform-local`, `kubernetes`, `argo-workflows`, `argocd`, `datadog`, `search-console`, and `axi-verify`, each owned by one package (`fixtures/adapters.mjs`); `contract-fixture` is the verifier's minimal packed test tool. Adapter names belong to their package family. Other family profiles explicitly remain unconfigured for new behaviour cases until their command data and adapter are supplied.
 
 | Field | Contract |
 | --- | --- |

@@ -7,6 +7,8 @@ import { appendFileSync, readFileSync } from "node:fs";
 import timers from "node:timers";
 import timersPromises from "node:timers/promises";
 import { createRequire, register, syncBuiltinESMExports } from "node:module";
+import { datadogMonitorSearch, googleSites } from "./adapter-replies.mjs";
+const behaviourData = () => process.env.AXI_BEHAVIOUR_DATA ? JSON.parse(readFileSync(process.env.AXI_BEHAVIOUR_DATA, "utf8")) : undefined;
 if (process.env.AXI_MODULE_LOG)
   register(new URL("./module-loader.mjs", import.meta.url));
 if (process.env.AXI_KEYRING_STATE)
@@ -21,6 +23,12 @@ globalThis.fetch = async (url, options) => {
     record({ kind: "registry-fixture", url: String(url), allowed: true });
     if (process.env.AXI_REGISTRY_FORCE_FALLBACK === "1") throw new Error("fixture registry transport failure");
     return new Response(JSON.stringify({ version: process.env.AXI_REGISTRY_VERSION }), { headers: { "content-type": "application/json" } });
+  }
+  const data = behaviourData(), target = new URL(String(url));
+  if (data?.adapter === "datadog" && target.pathname === "/api/v1/monitor/search") {
+    record({ kind: "datadog-fixture", url: String(url), allowed: true });
+    const denied = data.mode === "backend-denied";
+    return new Response(JSON.stringify(denied ? { errors: ["Forbidden"] } : datadogMonitorSearch(data, target)), { status: denied ? 403 : 200, headers: { "content-type": "application/json" } });
   }
   return fetch(url, options);
 };
@@ -77,6 +85,13 @@ if (process.env.AXI_GOOGLE_ROOT) {
   const { JWT, UserRefreshClient } = require("google-auth-library");
   for (const Client of [JWT, UserRefreshClient])
     Client.prototype.request = async function (options) {
+      const behaviour = behaviourData(), seeded = behaviour?.adapter === "search-console", sites = "https://searchconsole.googleapis.com/webmasters/v3/sites";
+      const analytics = options.method === "POST" && options.url?.startsWith(sites + "/") && options.url.endsWith("/searchAnalytics/query") && !options.url.slice(sites.length + 1, -"/searchAnalytics/query".length).includes("/");
+      if (seeded && (options.url === sites && (!options.method || options.method === "GET") || analytics)) {
+        record({ kind: "google-request", url: options.url, method: options.method ?? "GET", allowed: true });
+        if (behaviour.mode === "backend-denied") throw new Error("synthetic permission denial");
+        return { data: analytics ? { rows: [] } : googleSites(behaviour) };
+      }
       const inspect = options.url === "https://searchconsole.googleapis.com/v1/urlInspection/index:inspect" && options.method === "POST" &&
         options.data?.inspectionUrl === "https://healthy.example.invalid/page" && options.data?.siteUrl === "https://healthy.example.invalid/";
       const allowed = inspect ||

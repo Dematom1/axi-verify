@@ -69,3 +69,15 @@ test("next commands preserve quoted paths and are never shell programs", () => {
   assert.deepEqual(nextCommands({ help: ["Add `--full`", "see help"] }, "tool"), []);
   for (const value of ["tool x; rm x", "tool $(whoami)", "tool 'unfinished", "tool x | cat"]) assert.throws(() => commandWords(value));
 });
+
+test("each AXI tool can only use its own fixture adapter", () => {
+  const owners = { "argo-workflows": "argo-workflows-axi", argocd: "argocd-axi", datadog: "datadog-axi", "search-console": "search-console-axi" };
+  for (const [fixture, name] of Object.entries(owners)) {
+    const value = copy(); value.package = name; value.fixture = fixture;
+    for (const command of value.commands) for (const example of command.examples) example[0] = name;
+    assert.equal(validateContract(value, name).fixture, fixture);
+    const borrowed = copy(); borrowed.package = "terraform-axi"; borrowed.fixture = fixture;
+    for (const command of borrowed.commands) for (const example of command.examples) example[0] = "terraform-axi";
+    assert.throws(() => validateContract(borrowed, "terraform-axi"), /fixture.*package/);
+  }
+});

@@ -40,6 +40,8 @@ const reads = {
   "/api/v1/synthetics/tests/abc-def-ghi": { public_id: "abc-def-ghi", name: "fixture", type: "api", config: {}, options: {}, status: "live" },
   "/api/v1/synthetics/tests/abc-def-ghi/results": { results: [] },
   "/api/v1/synthetics/tests/browser/abc-def-ghi/results": { results: [] },
+  "/api/v2/ci/pipelines/events": { data: [] },
+  "/api/v2/ci/tests/events": { data: [] },
   "/api/v1/notebooks": { data: [] },
   "/api/v1/notebooks/1": { data: { id: "1", attributes: { name: "fixture", cells: [] } } },
 };
@@ -52,6 +54,8 @@ const postReads = {
   "/api/v2/spans/events/search": { data: [{ id: "fixture", type: "span", attributes: { trace_id: "1234567890123456789", span_id: "1", parent_id: "0", start_timestamp: "2026-01-01T00:00:00Z", end_timestamp: "2026-01-01T00:00:01Z", service: "fixture", resource_name: "fixture", duration: 1000000000 } }] },
   "/api/v2/spans/analytics/aggregate": { data: { buckets: [] } },
   "/api/v2/events/search": { data: [] },
+  "/api/v2/ci/pipelines/events/search": { data: [], meta: {} },
+  "/api/v2/ci/tests/events/search": { data: [], meta: {} },
 };
 export function datadogReply(method, pathname) {
   return method === "GET" ? reads[pathname] : method === "POST" ? postReads[pathname] : undefined;

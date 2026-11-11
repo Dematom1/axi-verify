@@ -1,6 +1,7 @@
 import * as fs from "node:fs/promises";
 import { join } from "node:path";
 import { json } from "../lib/lab.mjs";
+import { adapters } from "./adapters.mjs";
 
 // Fixture adapters own the expected records. Consumer manifests cannot supply
 // expected backend data, arbitrary commands, credentials, or network access.
@@ -9,11 +10,14 @@ export async function seedBehaviour(lab, contract, mode = "normal") {
   for (const path of [projectA, join(projectA, "child"), projectB, join(lab.cwd, "unrelated")]) await fs.mkdir(path, { recursive: true });
   const plan = join(lab.base, "plan.json"), session = join(lab.home, "session-a.txt");
   const terraform = contract.fixture === "terraform-local";
-  const total = mode === "empty" ? 0 : mode === "small" ? 1 : terraform ? 105 : 5;
-  const identities = Array.from({ length: total }, (_, i) => terraform ? `terraform_data.item${String(i).padStart(3, "0")}` : String(i));
+  const adapter = adapters[contract.fixture];
+  const total = mode === "empty" ? 0 : mode === "small" ? 1 : terraform ? 105 : adapter.total ?? 5;
+  const identity = adapter.identity ?? ((i) => terraform ? `terraform_data.item${String(i).padStart(3, "0")}` : String(i));
+  const identities = Array.from({ length: total }, (_, i) => identity(i));
   const text = mode === "small" ? "short fixture" : "x".repeat(500) + "TAIL";
   const data = { adapter: contract.fixture, mode, module: projectA, projectA, projectB, session, text, identities, homeMarker: "project-a" };
   lab.env.AXI_BEHAVIOUR_DATA = join(lab.base, "behaviour.json");
+  if (contract.fixture === "search-console") { lab.env.GOOGLE_APPLICATION_CREDENTIALS = lab.key; lab.env.AXI_GOOGLE_ROOT = lab.packageRoot; }
   await json(lab.env.AXI_BEHAVIOUR_DATA, data);
   const planCount = mode === "empty" ? 0 : mode === "small" ? 1 : 30;
   const changes = Array.from({ length: planCount }, (_, i) => ({ address: `terraform_data.item${String(i).padStart(3, "0")}`, mode: "managed", type: "terraform_data", name: `item${String(i).padStart(3, "0")}`, provider_name: "terraform.io/builtin/terraform", change: { actions: ["create"], before: null, after: { input: "fixture" }, after_unknown: {} } }));
@@ -37,6 +41,11 @@ export async function seedBehaviour(lab, contract, mode = "normal") {
       if (contract.fixture === "axi-verify") {
         await json(join(lab.cwd, ".axi/verify.json"), {});
         return { present: "configured", absent: "unconfigured" };
+      }
+      if (adapter.identity) {
+        // Live backend state: rename the first record so a content-first home must change with it.
+        const absent = data.identities[0]; data.identities[0] = adapter.renamed; await json(lab.env.AXI_BEHAVIOUR_DATA, data);
+        return { present: adapter.renamed, absent };
       }
       data.homeMarker = "project-new"; await json(lab.env.AXI_BEHAVIOUR_DATA, data);
       return { present: "project-new", absent: "project-a" };

@@ -1,11 +1,15 @@
 import assert from "node:assert/strict";
 import * as fs from "node:fs/promises";
+import { pathToFileURL } from "node:url";
 import { test } from "node:test";
-import { advertisedRoutes } from "../lib/command-inventory.mjs";
-import { helpVariants } from "../lib/behaviours.mjs";
+import { advertisedRoutes, exportedRegistration } from "../lib/command-inventory.mjs";
+import { applicable, helpVariants } from "../lib/behaviours.mjs";
 import { validateContract } from "../lib/contract.mjs";
 import { sessionEndReported } from "../lib/observations.mjs";
 import { kubernetesReply } from "../fixtures/kubernetes.mjs";
+import { datadogReply } from "../fixtures/datadog.mjs";
+import { profiles } from "../lib/profiles.mjs";
+import { cleanup, scratch } from "../lib/lab.mjs";
 
 // Pinned from terraform-axi 0.1.5, the version the sweep found these false
 // positives against. See tests/terraform-0.1.5/provenance.json.
@@ -68,4 +72,29 @@ test("kubectl logs fixture serves the --tail=101 request k8s-axi uses to detect 
   assert.equal(kubernetesReply(args(100)), "fixture log\n");
   assert.equal(kubernetesReply(args(101)), "fixture log\n");
   assert.equal(kubernetesReply(args(102)), undefined);
+});
+
+test("ambient context is not applicable to a tool that installs no hooks, and only to such a tool", () => {
+  const contract = { cases: {}, fixture: "search-console", unsupported: [{ check: "ambient", status: "not-applicable", reason: "installs no hooks" }] };
+  assert.deepEqual(applicable(contract, "ambient", { hooks: [] }), { notApplicable: "installs no hooks" });
+  assert.throws(() => applicable(contract, "ambient", { hooks: ["claude:SessionStart"] }), /unconfigured ambient/);
+  assert.throws(() => applicable(contract, "list", { hooks: [] }), /unconfigured list/);
+});
+
+test("a tool's imported command registry produces its public routes", async () => {
+  const root = await scratch();
+  try {
+    const modulePath = `${root}/commands.mjs`;
+    await fs.writeFile(modulePath, 'export const commands = [{ name: "setup", subcommands: { check: "", status: "" } }, { name: "report" }];');
+    const registry = await import(pathToFileURL(modulePath));
+    const registration = exportedRegistration(registry);
+    assert.deepEqual(registration.commands, ["setup", "report"]);
+    assert.deepEqual(registration.routes, ["", "report", "setup", "setup check", "setup status"]);
+  } finally { await cleanup(root); }
+});
+
+test("profiles and the datadog stub cover what the packed tools actually use", () => {
+  assert(profiles["argocd-axi"].codes.includes("FILE_ERROR"), "argocd-axi reports FILE_ERROR for unreadable hook files");
+  for (const path of ["/api/v2/ci/pipelines/events", "/api/v2/ci/tests/events"]) assert.deepEqual(datadogReply("GET", path), { data: [] });
+  for (const route of ["ci pipelines", "ci tests", "ci view"]) assert(profiles["datadog-axi"].idempotency.some((f) => f.route === route), `datadog-axi ${route} needs a retry fixture`);
 });

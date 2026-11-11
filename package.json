@@ -1,6 +1,6 @@
 {
   "name": "axi-verify",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Packed CLI contract and static regression checks for Dematom1 AXI tools",
   "type": "module",
   "license": "MIT",

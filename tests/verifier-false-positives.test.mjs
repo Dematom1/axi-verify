@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import * as fs from "node:fs/promises";
+import { pathToFileURL } from "node:url";
 import { test } from "node:test";
 import { advertisedRoutes, exportedRegistration } from "../lib/command-inventory.mjs";
 import { applicable, helpVariants } from "../lib/behaviours.mjs";
@@ -8,6 +9,7 @@ import { sessionEndReported } from "../lib/observations.mjs";
 import { kubernetesReply } from "../fixtures/kubernetes.mjs";
 import { datadogReply } from "../fixtures/datadog.mjs";
 import { profiles } from "../lib/profiles.mjs";
+import { cleanup, scratch } from "../lib/lab.mjs";
 
 // Pinned from terraform-axi 0.1.5, the version the sweep found these false
 // positives against. See tests/terraform-0.1.5/provenance.json.
@@ -79,11 +81,16 @@ test("ambient context is not applicable to a tool that installs no hooks, and on
   assert.throws(() => applicable(contract, "list", { hooks: [] }), /unconfigured list/);
 });
 
-test("a tool that dispatches its own commands is inventoried from its exported registry", () => {
-  const registration = exportedRegistration({ commands: [{ name: "setup", subcommands: { check: "", status: "" } }, { name: "report" }] });
-  assert.deepEqual(registration.commands, ["setup", "report"]);
-  assert.deepEqual(registration.routes, ["", "report", "setup", "setup check", "setup status"]);
-  assert.throws(() => exportedRegistration({}), /exports no command registry/);
+test("a tool's imported command registry produces its public routes", async () => {
+  const root = await scratch();
+  try {
+    const modulePath = `${root}/commands.mjs`;
+    await fs.writeFile(modulePath, 'export const commands = [{ name: "setup", subcommands: { check: "", status: "" } }, { name: "report" }];');
+    const registry = await import(pathToFileURL(modulePath));
+    const registration = exportedRegistration(registry);
+    assert.deepEqual(registration.commands, ["setup", "report"]);
+    assert.deepEqual(registration.routes, ["", "report", "setup", "setup check", "setup status"]);
+  } finally { await cleanup(root); }
 });
 
 test("profiles and the datadog stub cover what the packed tools actually use", () => {

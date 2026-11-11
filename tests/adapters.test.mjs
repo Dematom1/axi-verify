@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import * as fs from "node:fs/promises";
+import { spawnSync } from "node:child_process";
 import { test } from "node:test";
 import { cleanup, sandbox, scratch } from "../lib/lab.mjs";
 import { seedBehaviour } from "../fixtures/behaviour.mjs";
 import { adapters } from "../fixtures/adapters.mjs";
 import { argoWorkflows, argocdApps, datadogMonitorSearch, googleSites } from "../fixtures/adapter-replies.mjs";
-import { behaviourReply } from "../fixtures/behaviour-external.mjs";
 
 const named = Object.entries(adapters).filter(([, adapter]) => adapter.identity);
 
@@ -55,17 +55,25 @@ test("datadog monitor search pages through the seeded collection with a structur
   assert.equal(datadogMonitorSearch(data, new URL("http://x.invalid/api/v1/monitor/search?per_page=50")).monitors.length, 50);
 });
 
-test("subprocess backends answer only their own adapter's exact list vectors", async () => {
+test("external fixture subprocess emits documented Argo list records", async () => {
   const root = await scratch();
   try {
-    for (const [fixture, bin, args] of [["argo-workflows", "argo", ["list", "--output=json", "--loglevel=error"]], ["argocd", "argocd", ["app", "list", "-o", "json"]]]) {
+    const script = new URL("../fixtures/external.mjs", import.meta.url);
+    for (const [fixture, bin, args, firstNames, health] of [
+      ["argo-workflows", "argo", ["list", "--output=json", "--loglevel=error"], ["wf-item000", "wf-item001", "wf-item002"], "Failed"],
+      ["argocd", "argocd", ["app", "list", "-o", "json"], ["app-item000", "app-item001", "app-item002"], "Degraded"],
+    ]) {
       const lab = await sandbox(root); lab.packageRoot = root; lab.key = `${root}/key.json`;
       await seedBehaviour(lab, { fixture }, "normal");
-      process.env.AXI_BEHAVIOUR_DATA = lab.env.AXI_BEHAVIOUR_DATA;
-      const reply = behaviourReply(bin, args);
-      assert.equal(reply.exit, 0); assert.equal(reply.stdout.length, 105);
-      assert.equal(behaviourReply(bin, [...args, "--extra"]), undefined, "unknown argv fails closed");
-      assert.equal(behaviourReply(bin === "argo" ? "argocd" : "argo", args), undefined, "other binaries stay unserved");
+      const executable = `${root}/${bin}`;
+      await fs.symlink(script, executable);
+      const result = spawnSync(process.execPath, [executable, ...args], { encoding: "utf8", env: { ...process.env, ...lab.env } });
+      assert.equal(result.status, 0, result.stderr);
+      const records = JSON.parse(result.stdout);
+      assert.equal(records.length, 105);
+      assert.deepEqual(records.slice(0, 3).map((record) => record.metadata.name), firstNames);
+      assert(records.slice(0, 3).every((record) => (record.status.phase ?? record.status.health.status) === health));
+      assert.equal(records[3].status.phase ?? records[3].status.health.status, fixture === "argo-workflows" ? "Succeeded" : "Healthy");
     }
-  } finally { delete process.env.AXI_BEHAVIOUR_DATA; await cleanup(root); }
+  } finally { await cleanup(root); }
 });

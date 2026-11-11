@@ -23,6 +23,7 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci --no-audit --no-fund
+      - run: npm run lint
       - run: npm test
       - name: Preserve historical red/green evidence
         run: npm run proof:history -- "$RUNNER_TEMP/static-history"
